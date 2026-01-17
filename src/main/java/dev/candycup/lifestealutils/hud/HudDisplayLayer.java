@@ -1,5 +1,6 @@
 package dev.candycup.lifestealutils.hud;
 
+import dev.candycup.lifestealutils.LifestealServerDetector;
 import dev.candycup.lifestealutils.ui.HudElementEditor;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.Minecraft;
@@ -14,6 +15,9 @@ public final class HudDisplayLayer {
    public static HudElement lsuHudLayer() {
       return (drawContext, tickCounter) -> {
          Minecraft minecraft = Minecraft.getInstance();
+         if (!LifestealServerDetector.isOnLifestealServer()) {
+            return;
+         }
          if (minecraft.screen instanceof HudElementEditor) {
             return;
          }

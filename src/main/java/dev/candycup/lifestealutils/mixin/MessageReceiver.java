@@ -1,7 +1,8 @@
 package dev.candycup.lifestealutils.mixin;
 
 import dev.candycup.lifestealutils.Config;
-import dev.candycup.lifestealutils.features.messages.ClaimChatCustomizer;
+import dev.candycup.lifestealutils.LifestealServerDetector;
+//import dev.candycup.lifestealutils.features.messages.ClaimChatCustomizer;
 import dev.candycup.lifestealutils.features.messages.MessageCustomizer;
 import dev.candycup.lifestealutils.features.timers.BasicTimerManager;
 import dev.candycup.lifestealutils.interapi.MessagingUtils;
@@ -34,14 +35,20 @@ public class MessageReceiver {
          return;
       }
 
+      if (!LifestealServerDetector.isOnLifestealServer()) {
+         return;
+      }
+
       String rawMessage = component.getString();
       BasicTimerManager.handleChatMessage(rawMessage);
 
+      /*
       // Attempt to handle claim chat formatting; if handled, cancel the original message
       if (Config.getEnableClaimChatFormat() && ClaimChatCustomizer.tryHandle(rawMessage)) {
          ci.cancel();
          return;
       }
+      */
 
       // Attempt to handle private message formatting; if handled, cancel the original message
       if (Config.getEnablePmFormat() && MessageCustomizer.tryHandle(rawMessage)) {
@@ -77,7 +84,5 @@ public class MessageReceiver {
             return;
          }
       }
-
-      LOGGER.info(MiniMessage.miniMessage().serialize(MinecraftClientAudiences.of().asAdventure(component)));
    }
 }

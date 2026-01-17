@@ -22,7 +22,7 @@ public class SplashManagerMixin {
                  )
                  //? } else {
                  /*SPLASH_TEXTS.get((int) (Math.random() * SPLASH_TEXTS.size()))
-                 *///? }
+                  *///? }
          ));
       }
    }

@@ -37,11 +37,13 @@ public class Config {
    @SerialEntry(comment = "Customize the format of private messages (/msg, /r)")
    public static String pmFormat = "<light_purple><bold>{{direction}}</bold> {{sender}}</light_purple> <white>➡ {{message}}</white>";
 
+   /*
    @SerialEntry(comment = "Whether to enable custom claim chat formatting")
    public static boolean enableClaimChatFormat = false;
 
    @SerialEntry(comment = "Customize the format of claim chat messages")
    public static String claimChatFormat = "<gold><bold>{{claim}}</bold></gold> <dark_gray>|</dark_gray> <aqua>{{username}}</aqua><gray>:</gray> <white>{{message}}</white>";
+   */
 
    @SerialEntry(comment = "Quick Join button on the title screen")
    public static boolean quickJoinButtonEnabled = true;
@@ -120,6 +122,7 @@ public class Config {
       Config.pmFormat = format;
    }
 
+   /*
    public static boolean getEnableClaimChatFormat() {
       return Config.enableClaimChatFormat;
    }
@@ -136,6 +139,7 @@ public class Config {
    public static void setClaimChatFormat(String format) {
       Config.claimChatFormat = format;
    }
+   */
 
    public static boolean getEnablePmFormat() {
       return Config.enablePmFormat;
@@ -311,24 +315,26 @@ public class Config {
                                       .controller(StringControllerBuilder::create)
                                       .build()
                               )
+                              /*
                               .option(Option.<Boolean>createBuilder()
-                                      .name(Component.translatable("lsu.option.claimChatFormatEnabled.name"))
-                                      .binding(false, Config::getEnableClaimChatFormat, Config::setEnableClaimChatFormat)
-                                      .controller(TickBoxControllerBuilder::create)
-                                      .build()
+                                 .name(Component.translatable("lsu.option.claimChatFormatEnabled.name"))
+                                 .binding(false, Config::getEnableClaimChatFormat, Config::setEnableClaimChatFormat)
+                                 .controller(TickBoxControllerBuilder::create)
+                                 .build()
                               )
                               .option(Option.<String>createBuilder()
-                                      .name(Component.translatable("lsu.option.claimChatFormat.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Changes the format of claim chat messages.\n\n" +
-                                                              "Default: <gold><bold>{{claim}}</bold></gold> <dark_gray>|</dark_gray> <aqua>{{username}}</aqua><gray>:</gray> <white>{{message}}</white>\n"
-                                              ))
-                                              .build())
-                                      .binding(Config.claimChatFormat, Config::getClaimChatFormat, Config::setClaimChatFormat)
-                                      .controller(StringControllerBuilder::create)
-                                      .build()
+                                 .name(Component.translatable("lsu.option.claimChatFormat.name"))
+                                 .description(OptionDescription.createBuilder()
+                                    .text(MessagingUtils.miniMessage(
+                                       "Changes the format of claim chat messages.\n\n" +
+                                          "Default: <gold><bold>{{claim}}</bold></gold> <dark_gray>|</dark_gray> <aqua>{{username}}</aqua><gray>:</gray> <white>{{message}}</white>\n"
+                                    ))
+                                    .build())
+                                 .binding(Config.claimChatFormat, Config::getClaimChatFormat, Config::setClaimChatFormat)
+                                 .controller(StringControllerBuilder::create)
+                                 .build()
                               )
+                              */
                               .build()
                       )
                       .group(OptionGroup.createBuilder()

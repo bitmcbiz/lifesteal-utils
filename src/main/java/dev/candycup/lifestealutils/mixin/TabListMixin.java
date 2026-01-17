@@ -1,6 +1,7 @@
 package dev.candycup.lifestealutils.mixin;
 
 import dev.candycup.lifestealutils.Config;
+import dev.candycup.lifestealutils.LifestealServerDetector;
 import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import net.kyori.adventure.platform.modcommon.MinecraftClientAudiences;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -45,6 +46,7 @@ public abstract class TabListMixin {
    @Inject(method = "decorateName", at = @At("HEAD"), cancellable = true)
    private void decorateNameHead(PlayerInfo playerInfo, MutableComponent mutableComponent, CallbackInfoReturnable<Component> cir) {
       if (!Config.getRemoveUniquePlusColor()) return;
+      if (!LifestealServerDetector.isOnLifestealServer()) return;
 
       String serialized = MiniMessage.miniMessage().serialize(MinecraftClientAudiences.of().asAdventure(mutableComponent));
 

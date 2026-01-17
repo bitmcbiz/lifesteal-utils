@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
 public final class ClaimChatCustomizer {
    private static final Pattern CLAIM_CHAT_PATTERN = Pattern.compile("^([^|]+?)\\s*\\|\\s*([^:]+):\\s+(.*)$", Pattern.CASE_INSENSITIVE);
    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
@@ -43,3 +44,4 @@ public final class ClaimChatCustomizer {
       }
    }
 }
+*/
