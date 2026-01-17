@@ -81,7 +81,6 @@ public class MessageReceiver {
             lsuInternalAdd = true;
             // Convert back to a Component using our helper so formatting is preserved
             ((ChatComponent) (Object) this).addMessage(MessagingUtils.miniMessage(filtered));
-            return;
          }
       }
    }

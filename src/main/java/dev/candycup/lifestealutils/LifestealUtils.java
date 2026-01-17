@@ -190,6 +190,18 @@ public final class LifestealUtils implements ClientModInitializer {
                                             return 1;
                                          }))
                          )
+                         .then(ClientCommandManager.literal("support")
+                                 .then(ClientCommandManager.literal("copy-client-info-to-clipboard")
+                                         .executes(commandContext -> {
+                                            Minecraft client = Minecraft.getInstance();
+                                            boolean copied = DebugInformationController.copyBasicInfoToClipboard(client);
+                                            if (copied) {
+                                               MessagingUtils.showMiniMessage("<green>Copied basic info to clipboard.</green>");
+                                               return 1;
+                                            }
+                                            MessagingUtils.showMiniMessage("<red>Player not available.</red>");
+                                            return 0;
+                                         })))
          );
       });
    }
