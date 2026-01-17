@@ -16,7 +16,7 @@ public class SplashManagerMixin {
    private void getSplashHead(CallbackInfoReturnable<SplashRenderer> cir) {
       if (getCustomSplashes()) {
          cir.setReturnValue(new SplashRenderer(
-                 //? if > 1.21.8 {
+                 //? if > 1.21.10 {
                  dev.candycup.lifestealutils.interapi.MessagingUtils.miniMessage(
                          "<yellow>" + SPLASH_TEXTS.get((int) (Math.random() * SPLASH_TEXTS.size())) + "</yellow>"
                  )

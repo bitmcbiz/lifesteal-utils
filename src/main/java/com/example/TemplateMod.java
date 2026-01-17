@@ -10,7 +10,7 @@ public class TemplateMod implements ModInitializer {
     // It is considered best practice to use your mod id as the logger's name.
     // That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger("template");
-    public static final String VERSION = /*$ mod_version*/ "0.1.0";
+    public static final String VERSION = /*$ mod_version*/ "0.2.0";
     public static final String MINECRAFT = /*$ minecraft*/ "1.21.11";
 
     @Override
