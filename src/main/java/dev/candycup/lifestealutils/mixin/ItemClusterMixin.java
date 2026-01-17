@@ -58,6 +58,10 @@ public class ItemClusterMixin implements ItemClusterRenderStateDuck {
         if (tag instanceof CompoundTag nbt) {
             nbt.getCompound("minecraft:custom_data").ifPresent(custom -> {
                 custom.getCompound("PublicBukkitValues").ifPresent(pbv -> {
+                    if (pbv.contains("lifesteal:artifact")) {
+                        lifestealutils$setRare(true);
+                        return;
+                    }
                     for (String key : pbv.keySet()) {
                         if (key.startsWith("enchants:")) {
                             lifestealutils$setRare(true);
