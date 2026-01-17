@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import dev.candycup.lifestealutils.features.timers.BasicTimerManager;
 import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
@@ -14,6 +15,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,15 @@ public class Config {
 
    @SerialEntry(comment = "Removes the unique coloring of the plus in LSN+ for visual simplicity.")
    public static boolean removeUniquePlusColor = false;
+
+   @SerialEntry(comment = "Whether to enable alliance features such as colored name tags.")
+   public static boolean enableAlliances = true;
+
+   @SerialEntry(comment = "Alliance name color as ARGB int")
+   public static int allianceNameColor = 0xFF55FF55;
+
+   @SerialEntry(comment = "List of allied player UUIDs")
+   public static List<String> allianceUuids = new ArrayList<>();
 
    @SerialEntry(comment = "Whether to enable custom splashes on the title screen")
    public static boolean customSplashes = true;
@@ -161,6 +173,47 @@ public class Config {
       HANDLER.save();
    }
 
+   public static boolean getEnableAlliances() {
+      return Config.enableAlliances;
+   }
+
+   public static void setEnableAlliances(boolean enabled) {
+      Config.enableAlliances = enabled;
+      HANDLER.save();
+   }
+
+   public static int getAllianceNameColor() {
+      return Config.allianceNameColor;
+   }
+
+   public static void setAllianceNameColor(int color) {
+      Config.allianceNameColor = color;
+      HANDLER.save();
+   }
+
+   public static Color getAllianceNameColorValue() {
+      return new Color(Config.allianceNameColor, true);
+   }
+
+   public static void setAllianceNameColorValue(Color color) {
+      if (color == null) return;
+      Config.allianceNameColor = color.getRGB();
+      HANDLER.save();
+   }
+
+   public static String getAllianceNameColorTag() {
+      return String.format("#%06X", Config.allianceNameColor & 0xFFFFFF);
+   }
+
+   public static List<String> getAllianceUuids() {
+      return Config.allianceUuids;
+   }
+
+   public static void setAllianceUuids(List<String> uuids) {
+      Config.allianceUuids = uuids;
+      HANDLER.save();
+   }
+
    public static boolean getCustomSplashes() {
       return Config.customSplashes;
    }
@@ -212,6 +265,32 @@ public class Config {
               .category(ConfigCategory.createBuilder()
                       .name(Component.translatable("lsu.category.main"))
                       .group(buildTimerOptions())
+                      .group(OptionGroup.createBuilder()
+                              .name(Component.translatable("lsu.group.alliances"))
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.enableAlliances.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Enables alliance features such as colored name tags."
+                                              ))
+                                              .build())
+                                      .binding(true, Config::getEnableAlliances, Config::setEnableAlliances)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .option(Option.<Color>createBuilder()
+                                      .name(Component.translatable("lsu.option.allianceNameColor.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Pick the name color for allied players."
+                                              ))
+                                              .build())
+                                      .binding(Config.getAllianceNameColorValue(), Config::getAllianceNameColorValue, Config::setAllianceNameColorValue)
+                                      .controller(ColorControllerBuilder::create)
+                                      .build()
+                              )
+                              .build()
+                      )
                       .group(OptionGroup.createBuilder()
                               .name(Component.translatable("lsu.group.messageCustomization"))
                               .option(Option.<Boolean>createBuilder()

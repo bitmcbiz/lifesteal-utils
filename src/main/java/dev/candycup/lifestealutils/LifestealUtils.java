@@ -1,13 +1,15 @@
 package dev.candycup.lifestealutils;
 
-//? if >1.21.8
-
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.candycup.lifestealutils.features.alliances.Alliances;
 import dev.candycup.lifestealutils.hud.HudDisplayLayer;
 import dev.candycup.lifestealutils.hud.HudElementDefinition;
 import dev.candycup.lifestealutils.hud.HudElementManager;
 import dev.candycup.lifestealutils.features.timers.BasicTimerManager;
+import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import dev.candycup.lifestealutils.ui.HudElementEditor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -17,7 +19,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +33,7 @@ public final class LifestealUtils implements ClientModInitializer {
    //? if >1.21.8
    private static KeyMapping.Category LIFESTEAL_UTIL_BINDS;
    private static KeyMapping openHudEditorKeyBinding;
+   private static KeyMapping addAllianceTargetKeyBinding;
 
    @Override
    public void onInitializeClient() {
@@ -62,10 +69,21 @@ public final class LifestealUtils implements ClientModInitializer {
               GLFW.GLFW_KEY_H,
               LIFESTEAL_UTIL_BINDS
       ));
+      addAllianceTargetKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+              "key.lifesteal-utils.add_alliance_target",
+              InputConstants.Type.KEYSYM,
+              GLFW.GLFW_KEY_K,
+              LIFESTEAL_UTIL_BINDS
+      ));
       //?} else {
       /*openHudEditorKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
               "key.lifesteal-utils.open_hud_editor",
               GLFW.GLFW_KEY_H,
+              "category.lifesteal-utils.lifesteal_utils"
+      ));
+      addAllianceTargetKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+              "key.lifesteal-utils.add_alliance_target",
+              GLFW.GLFW_KEY_K,
               "category.lifesteal-utils.lifesteal_utils"
       ));
       *///?}
@@ -77,6 +95,25 @@ public final class LifestealUtils implements ClientModInitializer {
             client.setScreen(new HudElementEditor(
                     net.minecraft.network.chat.Component.literal("HUD Element Editor")
             ));
+         }
+         if (addAllianceTargetKeyBinding.consumeClick()) {
+            if (client.screen != null) return;
+            LocalPlayer localPlayer = client.player;
+            if (localPlayer == null) return;
+            HitResult hitResult = client.hitResult;
+            if (hitResult instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof Player targetPlayer) {
+               Boolean added = Alliances.toggleAlliance(targetPlayer);
+               String name = targetPlayer.getName().getString();
+               if (added == null) {
+                  MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<red>Couldn't update alliance for <white>" + MiniMessage.miniMessage().escapeTags(name) + "</white>.</red>"));
+               } else if (added) {
+                  MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<green>Added <white>" + MiniMessage.miniMessage().escapeTags(name) + "</white> to your alliance.</green>"));
+               } else {
+                  MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<yellow>Removed <white>" + MiniMessage.miniMessage().escapeTags(name) + "</white> from your alliance.</yellow>"));
+               }
+            } else {
+               MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<red>You're not looking at a player.</red>"));
+            }
          }
          BasicTimerManager.tick();
       });
@@ -103,6 +140,47 @@ public final class LifestealUtils implements ClientModInitializer {
                                     )));
                                     return 1;
                                  }))
+                         .then(ClientCommandManager.literal("alliances")
+                                 .executes(commandContext -> {
+                                    Alliances.showAllianceList();
+                                    return 1;
+                                 })
+                                 .then(ClientCommandManager.literal("list")
+                                         .executes(commandContext -> {
+                                            Alliances.showAllianceList();
+                                            return 1;
+                                         }))
+                                 .then(ClientCommandManager.literal("add")
+                                         .then(ClientCommandManager.argument("username", StringArgumentType.word())
+                                                 .executes(commandContext -> {
+                                                    String username = StringArgumentType.getString(commandContext, "username");
+                                                    boolean added = Alliances.addAlliance(username);
+                                                    if (added) {
+                                                       MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<green>Added <white>" + MiniMessage.miniMessage().escapeTags(username) + "</white> to your alliance.</green>"));
+                                                    } else {
+                                                       MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<red>Could not find player <white>" + MiniMessage.miniMessage().escapeTags(username) + "</white>.</red>"));
+                                                    }
+                                                    return 1;
+                                                 })))
+                                 .then(ClientCommandManager.literal("remove")
+                                         .then(ClientCommandManager.argument("username", StringArgumentType.word())
+                                                 .executes(commandContext -> {
+                                                    String username = StringArgumentType.getString(commandContext, "username");
+                                                    boolean removed = Alliances.removeAlliance(username);
+                                                    if (removed) {
+                                                       MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<yellow>Removed <white>" + MiniMessage.miniMessage().escapeTags(username) + "</white> from your alliance.</yellow>"));
+                                                    } else {
+                                                       MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<red>Could not find player <white>" + MiniMessage.miniMessage().escapeTags(username) + "</white> in your alliance.</red>"));
+                                                    }
+                                                    return 1;
+                                                 })))
+                                 .then(ClientCommandManager.literal("clear")
+                                         .executes(commandContext -> {
+                                            Alliances.clearAlliances();
+                                            MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<yellow>Cleared all alliance members.</yellow>"));
+                                            return 1;
+                                         }))
+                         )
          );
       });
    }

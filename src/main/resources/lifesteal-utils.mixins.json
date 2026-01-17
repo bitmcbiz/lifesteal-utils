@@ -6,6 +6,7 @@
   ],
   "client": [
     "MessageReceiver",
+    "NameTagSubmitMixin",
     "SplashManagerMixin",
     "TabListMixin",
     "TitleScreenMixin"

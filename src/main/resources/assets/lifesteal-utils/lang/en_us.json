@@ -12,5 +12,9 @@
   "lsu.group.simplications": "Simplifications",
   "lsu.option.disableChatTags.name": "Disable Chat Tags",
   "lsu.option.removeUniquePlusColor.name": "Force LSN+ Indicator to Follow Rank Color Schema",
-  "lsu.option.customSplashes.name": "Use Custom Splash Texts"
+  "lsu.option.customSplashes.name": "Use Custom Splash Texts",
+  "lsu.group.alliances": "Alliances",
+  "lsu.option.enableAlliances.name": "Enable Alliances",
+  "lsu.option.allianceNameColor.name": "Alliance Name Color",
+  "key.lifesteal-utils.add_alliance_target": "Add Looked-at Player to Alliance"
 }
