@@ -1,5 +1,6 @@
 package dev.candycup.lifestealutils.mixin;
 
+//? if > 1.21.8 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.candycup.lifestealutils.Config;
 import dev.candycup.lifestealutils.ItemClusterRenderStateDuck;
@@ -22,3 +23,4 @@ public class ItemRendererMixin {
         poseStack.scale(scale, scale, scale);
     }
 }
+//?}

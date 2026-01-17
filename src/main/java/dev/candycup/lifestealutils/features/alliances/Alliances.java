@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
@@ -15,13 +16,18 @@ import net.minecraft.world.entity.player.Player;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 public final class Alliances {
    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+   private static final long ONLINE_NAME_CACHE_TTL_MS = 500;
+   private static Map<String, UUID> onlineNameCache = new HashMap<>();
+   private static long onlineNameCacheExpiresAt = 0;
 
    private Alliances() {
    }
@@ -104,7 +110,7 @@ public final class Alliances {
 
    public static boolean isAlliedName(String username) {
       if (username == null || username.isBlank()) return false;
-      UUID uuid = resolveOnlineUuid(username);
+      UUID uuid = resolveOnlineUuidCached(username);
       if (uuid == null) return false;
       return Config.getAllianceUuids().contains(uuid.toString());
    }
@@ -113,7 +119,14 @@ public final class Alliances {
       String serialized = MiniMessage.miniMessage().serialize(MinecraftClientAudiences.of().asAdventure(original));
       String updated = applyColorToLastWord(serialized);
       if (updated.equals(serialized)) return original;
-      return MessagingUtils.miniMessage(updated);
+      return ensureMutable(MessagingUtils.miniMessage(updated));
+   }
+
+   private static Component ensureMutable(Component component) {
+      if (component instanceof MutableComponent) return component;
+      MutableComponent wrapper = Component.literal("");
+      wrapper.append(component);
+      return wrapper;
    }
 
    public static String getLastVisibleWord(String miniMessage) {
@@ -227,6 +240,32 @@ public final class Alliances {
          }
       }
       return null;
+   }
+
+   private static UUID resolveOnlineUuidCached(String username) {
+      if (username == null || username.isBlank()) return null;
+      long now = System.currentTimeMillis();
+      if (now >= onlineNameCacheExpiresAt) {
+         rebuildOnlineNameCache(now);
+      }
+      return onlineNameCache.get(username.toLowerCase(Locale.ROOT));
+   }
+
+   private static void rebuildOnlineNameCache(long now) {
+      Map<String, UUID> next = new HashMap<>();
+      ClientPacketListener connection = Minecraft.getInstance().getConnection();
+      if (connection != null) {
+         for (PlayerInfo info : connection.getOnlinePlayers()) {
+            if (info == null || info.getProfile() == null) continue;
+            String name = getProfileName(info);
+            UUID id = getProfileId(info);
+            if (name != null && id != null) {
+               next.put(name.toLowerCase(Locale.ROOT), id);
+            }
+         }
+      }
+      onlineNameCache = next;
+      onlineNameCacheExpiresAt = now + ONLINE_NAME_CACHE_TTL_MS;
    }
 
    private static List<String> getAllianceDisplayNames() {
