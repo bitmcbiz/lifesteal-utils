@@ -6,6 +6,7 @@ import dev.candycup.lifestealutils.features.alliances.Alliances;
 import dev.candycup.lifestealutils.hud.HudDisplayLayer;
 import dev.candycup.lifestealutils.hud.HudElementDefinition;
 import dev.candycup.lifestealutils.hud.HudElementManager;
+import dev.candycup.lifestealutils.features.combat.UnbrokenChainTracker;
 import dev.candycup.lifestealutils.features.timers.BasicTimerManager;
 import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import dev.candycup.lifestealutils.ui.HudElementEditor;
@@ -46,6 +47,9 @@ public final class LifestealUtils implements ClientModInitializer {
       for (HudElementDefinition definition : BasicTimerManager.hudDefinitions()) {
          HudElementManager.register(definition);
       }
+
+      UnbrokenChainTracker.init();
+      HudElementManager.register(UnbrokenChainTracker.hudDefinition());
 
       HudElementRegistry.attachElementAfter(
               VanillaHudElements.CHAT,
@@ -125,6 +129,7 @@ public final class LifestealUtils implements ClientModInitializer {
             }
          }
          BasicTimerManager.tick();
+         UnbrokenChainTracker.tick();
       });
 
       ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> {

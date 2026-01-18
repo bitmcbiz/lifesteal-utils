@@ -106,8 +106,9 @@ public final class Alliances {
 
    /**
     * adds an alliance asynchronously, resolving the UUID off-thread if needed.
+    *
     * @param usernameOrUuid the username or UUID string
-    * @param callback called on the main thread with true if added, false if not found or already exists
+    * @param callback       called on the main thread with true if added, false if not found or already exists
     */
    public static void addAllianceAsync(String usernameOrUuid, Consumer<Boolean> callback) {
       UuidResolver.resolveUuidAsync(usernameOrUuid, uuid -> {
@@ -135,8 +136,9 @@ public final class Alliances {
 
    /**
     * removes an alliance asynchronously, resolving the UUID off-thread if needed.
+    *
     * @param usernameOrUuid the username or UUID string
-    * @param callback called on the main thread with true if removed, false if not found
+    * @param callback       called on the main thread with true if removed, false if not found
     */
    public static void removeAllianceAsync(String usernameOrUuid, Consumer<Boolean> callback) {
       UuidResolver.resolveUuidAsync(usernameOrUuid, uuid -> {

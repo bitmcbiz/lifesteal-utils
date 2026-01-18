@@ -6,6 +6,8 @@
     "PlayerEntityMixin"
   ],
   "client": [
+    "AttackTrackerMixin",
+    "DamageListenerMixin",
     "MessageReceiver",
     "SplashManagerMixin",
     "TabListMixin",
@@ -18,5 +20,5 @@
   },
   "overwrites": {
     "requireAnnotations": true
-	}
+  }
 }
