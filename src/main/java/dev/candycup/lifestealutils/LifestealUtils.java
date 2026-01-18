@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class LifestealUtils implements ClientModInitializer {
-   private static final Logger LOGGER = LoggerFactory.getLogger("lifesteal-utils");
+   private static final Logger LOGGER = LoggerFactory.getLogger("lifestealutils");
    //? if >1.21.8
    private static KeyMapping.Category LIFESTEAL_UTIL_BINDS;
    private static KeyMapping openHudEditorKeyBinding;
@@ -61,7 +61,7 @@ public final class LifestealUtils implements ClientModInitializer {
 
       //? if >1.21.8 {
       LIFESTEAL_UTIL_BINDS = KeyMapping.Category.register(
-              Identifier.fromNamespaceAndPath("lifesteal-utils", "lifesteal_utils")
+              Identifier.fromNamespaceAndPath("lifestealutils", "lifesteal_utils")
       );
 
       openHudEditorKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(

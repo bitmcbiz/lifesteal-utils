@@ -36,7 +36,7 @@ public final class DebugInformationController {
       String fabricApiVersion = getModVersion("fabric-api");
       String javaVersion = System.getProperty("java.version", "unknown");
 
-      String lifestealUtilsVersion = getModVersion("lifesteal-utils");
+      String lifestealUtilsVersion = getModVersion("lifestealutils");
 
       List<String> modLines = FabricLoader.getInstance().getAllMods().stream()
               .map(ModContainer::getMetadata)

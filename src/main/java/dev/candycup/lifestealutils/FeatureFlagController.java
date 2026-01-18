@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class FeatureFlagController {
-   private static final Logger LOGGER = LoggerFactory.getLogger("lifesteal-utils/feature-flags");
+   private static final Logger LOGGER = LoggerFactory.getLogger("lifestealutils/feature-flags");
    private static final Gson GSON = new GsonBuilder().create();
    private static final String FEATURE_FLAG_URL = "https://gist.githubusercontent.com/Karkkikuppi/4146e00d65849ac142bbad711982c69e/raw/lsu.json";
    private static final String CURRENT_VERSION = detectModVersion();
@@ -53,7 +53,7 @@ public final class FeatureFlagController {
          HttpRequest request = HttpRequest.newBuilder()
                  .uri(URI.create(FEATURE_FLAG_URL))
                  .timeout(Duration.ofSeconds(5))
-                 .header("User-Agent", "lifesteal-utils/" + CURRENT_VERSION)
+                 .header("User-Agent", "lifestealutils/" + CURRENT_VERSION)
                  .GET()
                  .build();
          HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -130,7 +130,7 @@ public final class FeatureFlagController {
 
    private static String detectModVersion() {
       return FabricLoader.getInstance()
-              .getModContainer("lifesteal-utils")
+              .getModContainer("lifestealdutils")
               .map(container -> container.getMetadata().getVersion().getFriendlyString())
               .orElse("0.0.0");
    }
