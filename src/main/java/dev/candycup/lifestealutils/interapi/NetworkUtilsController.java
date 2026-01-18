@@ -196,7 +196,7 @@ public final class NetworkUtilsController {
 
    private static String detectModVersion() {
       return FabricLoader.getInstance()
-              .getModContainer("lifesteal-utils")
+              .getModContainer("lifestealutils")
               .map(container -> container.getMetadata().getVersion().getFriendlyString())
               .orElse("unknown");
    }
