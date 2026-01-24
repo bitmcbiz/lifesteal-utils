@@ -86,6 +86,9 @@ public class Config {
    @SerialEntry(comment = "Custom format for the unbroken chain counter display")
    public static String chainCounterFormat = "";
 
+   @SerialEntry(comment = "Automatically join the Lifesteal gamemode when connecting to the lifesteal.net hub")
+   public static boolean autoJoinLifestealOnHub = false;
+
    private static OptionDescription descriptionWithRemoteReasoning(String baseMiniMessage, String featureKey) {
       OptionDescription.Builder builder = OptionDescription.createBuilder()
               .text(MessagingUtils.miniMessage(baseMiniMessage));
@@ -232,6 +235,10 @@ public class Config {
    }
 
    public static boolean getEnableAlliances() {
+      Boolean forcedState = FeatureFlagController.getForcedState("enableAlliances");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.enableAlliances;
    }
 
@@ -369,6 +376,15 @@ public class Config {
       }
    }
 
+   public static boolean isAutoJoinLifestealOnHub() {
+      return autoJoinLifestealOnHub;
+   }
+
+   public static void setAutoJoinLifestealOnHub(boolean enabled) {
+      autoJoinLifestealOnHub = enabled;
+      HANDLER.save();
+   }
+
    public static void load() {
       FeatureFlagController.ensureLoaded();
       HANDLER.load();
@@ -386,13 +402,13 @@ public class Config {
                               .name(Component.translatable("lsu.group.alliances"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.enableAlliances.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Enables alliance features such as colored name tags."
-                                              ))
-                                              .build())
+                                      .description(descriptionWithRemoteReasoning(
+                                              "Enables alliance features such as colored name tags.",
+                                              "enableAlliances"
+                                      ))
                                       .binding(true, Config::getEnableAlliances, Config::setEnableAlliances)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("enableAlliances"))
                                       .build()
                               )
                               .option(Option.<Color>createBuilder()
@@ -471,6 +487,17 @@ public class Config {
                                               ))
                                               .build())
                                       .binding(true, Config::getCustomSplashes, Config::setCustomSplashes)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.literal("Auto-Join Lifesteal on Hub"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Automatically joins the Lifesteal gamemode on lifesteal.net when you join the main hub.\n\nExecutes /joinlifesteal after a second of joining the hub."
+                                              ))
+                                              .build())
+                                      .binding(false, Config::isAutoJoinLifestealOnHub, Config::setAutoJoinLifestealOnHub)
                                       .controller(TickBoxControllerBuilder::create)
                                       .build()
                               )

@@ -66,6 +66,9 @@ public final class FeatureFlagController {
          if (parsed.basicTimers == null) {
             parsed.basicTimers = Collections.emptyList();
          }
+         if (parsed.triggers == null) {
+            parsed.triggers = Collections.emptyMap();
+         }
          return parsed;
       } catch (Exception e) {
          LOGGER.error("[lsu-flags] failed to parse feature flag payload; using empty payload", e);
@@ -102,6 +105,10 @@ public final class FeatureFlagController {
       return timers;
    }
 
+   public static String getTrigger(String triggerKey) {
+      return payload.triggers.get(triggerKey);
+   }
+
    private static FeatureFlagRule selectRule(String featureKey) {
       List<FeatureFlagRule> rules = payload.features.get(featureKey);
       if (rules == null || rules.isEmpty()) {
@@ -117,7 +124,7 @@ public final class FeatureFlagController {
 
    private static String detectModVersion() {
       return FabricLoader.getInstance()
-              .getModContainer("lifestealdutils")
+              .getModContainer("lifestealutils")
               .map(container -> container.getMetadata().getVersion().getFriendlyString())
               .orElse("0.0.0");
    }
@@ -190,6 +197,7 @@ public final class FeatureFlagController {
    private static final class FeatureFlagPayload {
       Map<String, List<FeatureFlagRule>> features = Collections.emptyMap();
       List<FeatureFlagTimer> basicTimers = Collections.emptyList();
+      Map<String, String> triggers = Collections.emptyMap();
    }
 
    private static final class FeatureFlagRule {

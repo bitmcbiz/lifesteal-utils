@@ -58,6 +58,7 @@ public final class LifestealUtils implements ClientModInitializer {
    private static RareItemHighlight rareItemHighlight;
    private static QuickJoinButton quickJoinButton;
    private static CustomSplashes customSplashes;
+   private static dev.candycup.lifestealutils.features.qol.AutoJoinLifesteal autoJoinLifesteal;
 
    @Override
    public void onInitializeClient() {
@@ -100,6 +101,10 @@ public final class LifestealUtils implements ClientModInitializer {
       
       customSplashes = new dev.candycup.lifestealutils.features.titlescreen.CustomSplashes();
       EventBus.getInstance().register(customSplashes);
+      
+      // quality of life features
+      autoJoinLifesteal = new dev.candycup.lifestealutils.features.qol.AutoJoinLifesteal();
+      EventBus.getInstance().register(autoJoinLifesteal);
 
       HudElementRegistry.attachElementAfter(
               VanillaHudElements.CHAT,
