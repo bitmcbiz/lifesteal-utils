@@ -100,7 +100,12 @@ public class Config {
       OptionGroup.Builder group = OptionGroup.createBuilder()
               .name(Component.literal("Timers"));
 
-      List<BasicTimerManager.TimerEntry> timers = BasicTimerManager.timerEntries();
+      BasicTimerManager timerManager = LifestealUtils.getBasicTimerManager();
+      if (timerManager == null) {
+         return group.build(); // not initialized yet
+      }
+
+      List<BasicTimerManager.TimerEntry> timers = timerManager.getTimerEntries();
 
       timers.forEach(entry -> {
          String id = entry.id();
@@ -142,9 +147,9 @@ public class Config {
                       .name(Component.literal("Enable Chain Counter"))
                       .description(OptionDescription.createBuilder()
                               .text(MessagingUtils.miniMessage(
-                                      "Tracks consecutive hits without receiving damage.\n\n" +
-                                              "Each consecutive hit grants +5% bonus damage, capping at 50%.\n" +
-                                              "Bonus only applies after 2 consecutive hits."
+                                          "Tracks consecutive hits without receiving damage.\n\n" +
+                                             "Each consecutive hit grants +5% bonus damage, capping at 50%.\n" +
+                                             "Bonus starts on the 3rd hit and the chain resets after 5 seconds without a hit."
                               ))
                               .build())
                       .binding(false, Config::isChainCounterEnabled, Config::setChainCounterEnabled)

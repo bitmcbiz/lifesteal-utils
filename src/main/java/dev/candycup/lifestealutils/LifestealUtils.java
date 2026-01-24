@@ -2,7 +2,15 @@ package dev.candycup.lifestealutils;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.candycup.lifestealutils.event.EventBus;
+import dev.candycup.lifestealutils.event.events.ClientTickEvent;
 import dev.candycup.lifestealutils.features.alliances.Alliances;
+import dev.candycup.lifestealutils.features.items.RareItemHighlight;
+import dev.candycup.lifestealutils.features.messages.ChatTagRemover;
+import dev.candycup.lifestealutils.features.messages.PrivateMessageFormatter;
+import dev.candycup.lifestealutils.features.messages.RankPlusColorNormalizer;
+import dev.candycup.lifestealutils.features.titlescreen.CustomSplashes;
+import dev.candycup.lifestealutils.features.titlescreen.QuickJoinButton;
 import dev.candycup.lifestealutils.hud.HudDisplayLayer;
 import dev.candycup.lifestealutils.hud.HudElementDefinition;
 import dev.candycup.lifestealutils.hud.HudElementManager;
@@ -10,6 +18,7 @@ import dev.candycup.lifestealutils.features.combat.UnbrokenChainTracker;
 import dev.candycup.lifestealutils.features.timers.BasicTimerManager;
 import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import dev.candycup.lifestealutils.ui.HudElementEditor;
+import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -29,6 +38,8 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 public final class LifestealUtils implements ClientModInitializer {
    private static final Logger LOGGER = LoggerFactory.getLogger("lifestealutils");
    //? if >1.21.8
@@ -37,6 +48,16 @@ public final class LifestealUtils implements ClientModInitializer {
    private static KeyMapping addAllianceTargetKeyBinding;
    private static int pendingConfigOpenTicks = -1;
    private static int pendingHudEditorOpenTicks = -1;
+   
+   private static UnbrokenChainTracker unbrokenChainTracker;
+   private static BasicTimerManager basicTimerManager;
+   private static PrivateMessageFormatter privateMessageFormatter;
+   private static ChatTagRemover chatTagRemover;
+   private static RankPlusColorNormalizer rankPlusColorNormalizer;
+   private static Alliances alliances;
+   private static RareItemHighlight rareItemHighlight;
+   private static QuickJoinButton quickJoinButton;
+   private static CustomSplashes customSplashes;
 
    @Override
    public void onInitializeClient() {
@@ -44,13 +65,41 @@ public final class LifestealUtils implements ClientModInitializer {
       Config.load();
 
       HudElementManager.init();
-      BasicTimerManager.configure(FeatureFlagController.getBasicTimers());
-      for (HudElementDefinition definition : BasicTimerManager.hudDefinitions()) {
+      
+      // initialize and register event-based features
+      basicTimerManager = new BasicTimerManager(FeatureFlagController.getBasicTimers());
+      EventBus.getInstance().register(basicTimerManager);
+      for (HudElementDefinition definition : basicTimerManager.getHudDefinitions()) {
          HudElementManager.register(definition);
       }
 
-      UnbrokenChainTracker.init();
-      HudElementManager.register(UnbrokenChainTracker.hudDefinition());
+      unbrokenChainTracker = new UnbrokenChainTracker();
+      EventBus.getInstance().register(unbrokenChainTracker);
+      HudElementManager.register(unbrokenChainTracker.getHudDefinition());
+      
+      // chat message features - each is independent and modular
+      privateMessageFormatter = new dev.candycup.lifestealutils.features.messages.PrivateMessageFormatter();
+      EventBus.getInstance().register(privateMessageFormatter);
+      
+      chatTagRemover = new dev.candycup.lifestealutils.features.messages.ChatTagRemover();
+      EventBus.getInstance().register(chatTagRemover);
+      
+      rankPlusColorNormalizer = new dev.candycup.lifestealutils.features.messages.RankPlusColorNormalizer();
+      EventBus.getInstance().register(rankPlusColorNormalizer);
+      
+      // render-based features (performance-critical)
+      alliances = new Alliances();
+      EventBus.getInstance().register(alliances);
+      
+      rareItemHighlight = new dev.candycup.lifestealutils.features.items.RareItemHighlight();
+      EventBus.getInstance().register(rareItemHighlight);
+      
+      // UI features
+      quickJoinButton = new dev.candycup.lifestealutils.features.titlescreen.QuickJoinButton();
+      EventBus.getInstance().register(quickJoinButton);
+      
+      customSplashes = new dev.candycup.lifestealutils.features.titlescreen.CustomSplashes();
+      EventBus.getInstance().register(customSplashes);
 
       HudElementRegistry.attachElementAfter(
               VanillaHudElements.CHAT,
@@ -95,6 +144,9 @@ public final class LifestealUtils implements ClientModInitializer {
       *///?}
 
       ClientTickEvents.END_CLIENT_TICK.register(client -> {
+         // post tick event to event-based features
+         EventBus.getInstance().post(new ClientTickEvent(client));
+         
          if (client.player == null) return;
          if (pendingConfigOpenTicks >= 0) {
             if (pendingConfigOpenTicks == 0) {
@@ -139,8 +191,6 @@ public final class LifestealUtils implements ClientModInitializer {
                MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<red>You're not looking at a player.</red>"));
             }
          }
-         BasicTimerManager.tick();
-         UnbrokenChainTracker.tick();
       });
 
       ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> {
@@ -206,8 +256,7 @@ public final class LifestealUtils implements ClientModInitializer {
                                             Alliances.clearAlliances();
                                             MessagingUtils.showMiniMessage(Alliances.withDisabledWarning("<yellow>Cleared all alliance members.</yellow>"));
                                             return 1;
-                                         }))
-                         )
+                                         })))
                          .then(ClientCommandManager.literal("support")
                                  .then(ClientCommandManager.literal("copy-client-info-to-clipboard")
                                          .executes(commandContext -> {
@@ -219,9 +268,33 @@ public final class LifestealUtils implements ClientModInitializer {
                                             }
                                             MessagingUtils.showMiniMessage("<red>Player not available.</red>");
                                             return 0;
-                                         })))
-         );
+                                         }))
+                                 .then(ClientCommandManager.literal("take-panorama-screenshot")
+                                         .executes(commandContext -> {
+                                            Minecraft client = Minecraft.getInstance();
+
+                                            final File GAME_DIR = new File(FabricLoader.getInstance().getGameDir().toString());
+
+                                            client.execute(() -> {
+                                               client.grabPanoramixScreenshot(
+                                                       GAME_DIR
+                                               );
+
+                                               if (client.player != null) {
+                                                  client.player.sendMessage(
+                                                          MiniMessage.miniMessage().deserialize(
+                                                                  "<gray><italic>[Lifesteal Utils] snip snap! panorama taken! open your screenshots folder to see it!"
+                                                          )
+                                                  );
+                                               }
+                                            });
+                                            return 1;
+                                         }))));
       });
+   }
+
+   public static BasicTimerManager getBasicTimerManager() {
+      return basicTimerManager;
    }
 
 }
