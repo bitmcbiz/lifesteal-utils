@@ -41,8 +41,8 @@ public class ItemRendererMixin {
    }
 
    @Inject(method = {"render(Lnet/minecraft/client/renderer/entity/state/ItemEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"}, at = {@At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionfc;)V")})
-   private void scaleItems(ItemEntityRenderState itemEntityRenderState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
-      ItemStack stack = this.entity.getItem();
+   private void scaleItems(ItemEntityRenderState state, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
+      if(!((ItemClusterRenderStateDuck) state).lifestealutils$isRare()) return;
 
       float scale = Config.getRareItemScaling();
       poseStack.scale(scale, scale, scale);
