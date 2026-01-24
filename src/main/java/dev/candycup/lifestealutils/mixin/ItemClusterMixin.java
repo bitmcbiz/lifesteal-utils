@@ -26,11 +26,14 @@ public class ItemClusterMixin implements ItemClusterRenderStateDuck {
 
    @Unique
    private boolean lifestealutils$isRare = false;
+   @Unique
+   private ItemStack lifestealutils$itemStack = ItemStack.EMPTY;
 
    @Inject(method = "extractItemGroupRenderState", at = @At("HEAD"))
 
    private void lifestealutils$captureRare(Entity entity, ItemStack stack, ItemModelResolver resolver, CallbackInfo ci) {
       lifestealutils$setRare(false);
+      lifestealutils$setItemStack(stack.copy());
       
       if (stack.isEmpty()) return;
 
@@ -89,5 +92,15 @@ public class ItemClusterMixin implements ItemClusterRenderStateDuck {
    @Override
    public void lifestealutils$setRare(boolean rare) {
       this.lifestealutils$isRare = rare;
+   }
+
+   @Override
+   public ItemStack lifestealutils$getItemStack() {
+      return lifestealutils$itemStack;
+   }
+
+   @Override
+   public void lifestealutils$setItemStack(ItemStack stack) {
+      this.lifestealutils$itemStack = stack;
    }
 }

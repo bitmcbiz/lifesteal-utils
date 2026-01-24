@@ -12,6 +12,7 @@
     "ItemClusterMixin",
     "ItemRendererMixin",
     "MessageReceiver",
+    "ScreenAccessor",
     "SplashManagerMixin",
     "TabListMixin",
     "TitleScreenMixin"

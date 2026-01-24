@@ -1,8 +1,9 @@
 package dev.candycup.lifestealutils.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.candycup.lifestealutils.Config;
 import dev.candycup.lifestealutils.ItemClusterRenderStateDuck;
+import dev.candycup.lifestealutils.event.EventBus;
+import dev.candycup.lifestealutils.event.events.ItemRenderEvent;
 //? if > 1.21.8
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -23,11 +24,13 @@ public class ItemRendererMixin {
    //? if > 1.21.8 {
 
    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/ItemEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionfc;)V"))
-   private void scaleItems(ItemEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState, CallbackInfo ci) {
-      if (!((ItemClusterRenderStateDuck) state).lifestealutils$isRare()) return;
-
-      float scale = Config.getRareItemScaling();
-      poseStack.scale(scale, scale, scale);
+   private void dispatchItemRenderEvent(ItemEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState, CallbackInfo ci) {
+      ItemClusterRenderStateDuck duck = (ItemClusterRenderStateDuck) state;
+      ItemStack itemStack = duck.lifestealutils$getItemStack();
+      boolean isRare = duck.lifestealutils$isRare();
+      
+      ItemRenderEvent event = new ItemRenderEvent(itemStack, poseStack, isRare);
+      EventBus.getInstance().post(event);
    }
 
    //?} else {
@@ -41,11 +44,13 @@ public class ItemRendererMixin {
    }
 
    @Inject(method = {"render(Lnet/minecraft/client/renderer/entity/state/ItemEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"}, at = {@At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionfc;)V")})
-   private void scaleItems(ItemEntityRenderState state, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
-      if(!((ItemClusterRenderStateDuck) state).lifestealutils$isRare()) return;
-
-      float scale = Config.getRareItemScaling();
-      poseStack.scale(scale, scale, scale);
+   private void dispatchItemRenderEvent(ItemEntityRenderState state, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
+      ItemClusterRenderStateDuck duck = (ItemClusterRenderStateDuck) state;
+      ItemStack itemStack = duck.lifestealutils$getItemStack();
+      boolean isRare = duck.lifestealutils$isRare();
+      
+      ItemRenderEvent event = new ItemRenderEvent(itemStack, poseStack, isRare);
+      EventBus.getInstance().post(event);
    }
    *///?}
 }
