@@ -86,6 +86,9 @@ public class Config {
    @SerialEntry(comment = "Custom format for the unbroken chain counter display")
    public static String chainCounterFormat = "";
 
+   @SerialEntry(comment = "Automatically join the Lifesteal gamemode when connecting to the lifesteal.net hub")
+   public static boolean autoJoinLifestealOnHub = false;
+
    private static OptionDescription descriptionWithRemoteReasoning(String baseMiniMessage, String featureKey) {
       OptionDescription.Builder builder = OptionDescription.createBuilder()
               .text(MessagingUtils.miniMessage(baseMiniMessage));
@@ -232,6 +235,10 @@ public class Config {
    }
 
    public static boolean getEnableAlliances() {
+      Boolean forcedState = FeatureFlagController.getForcedState("enableAlliances");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.enableAlliances;
    }
 
@@ -369,6 +376,15 @@ public class Config {
       }
    }
 
+   public static boolean isAutoJoinLifestealOnHub() {
+      return autoJoinLifestealOnHub;
+   }
+
+   public static void setAutoJoinLifestealOnHub(boolean enabled) {
+      autoJoinLifestealOnHub = enabled;
+      HANDLER.save();
+   }
+
    public static void load() {
       FeatureFlagController.ensureLoaded();
       HANDLER.load();
@@ -378,21 +394,27 @@ public class Config {
       FeatureFlagController.ensureLoaded();
       return YetAnotherConfigLib.createBuilder()
               .title(Component.translatable("lsu.name"))
+              // category 1: timers & counters
               .category(ConfigCategory.createBuilder()
-                      .name(Component.translatable("lsu.category.main"))
+                      .name(Component.literal("Timers & Counters"))
                       .group(buildTimerOptions())
                       .group(buildChainCounterOptions())
+                      .build()
+              )
+              // category 2: alliances
+              .category(ConfigCategory.createBuilder()
+                      .name(Component.literal("Alliances"))
                       .group(OptionGroup.createBuilder()
-                              .name(Component.translatable("lsu.group.alliances"))
+                              .name(Component.literal("Alliance Settings"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.enableAlliances.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Enables alliance features such as colored name tags."
-                                              ))
-                                              .build())
+                                      .description(descriptionWithRemoteReasoning(
+                                              "Enables alliance features such as colored name tags.",
+                                              "enableAlliances"
+                                      ))
                                       .binding(true, Config::getEnableAlliances, Config::setEnableAlliances)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("enableAlliances"))
                                       .build()
                               )
                               .option(Option.<Color>createBuilder()
@@ -408,8 +430,114 @@ public class Config {
                               )
                               .build()
                       )
+                      .build()
+              )
+              // category 3: quality of life
+              .category(ConfigCategory.createBuilder()
+                      .name(Component.literal("Quality of Life"))
                       .group(OptionGroup.createBuilder()
-                              .name(Component.translatable("lsu.group.messageCustomization"))
+                              .name(Component.literal("Auto-Join"))
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.literal("Auto-Join Lifesteal on Hub"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Automatically joins the Lifesteal gamemode on lifesteal.net when you join the main hub.\n\nExecutes /joinlifesteal after a second of joining the hub."
+                                              ))
+                                              .build())
+                                      .binding(false, Config::isAutoJoinLifestealOnHub, Config::setAutoJoinLifestealOnHub)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .build()
+                      )
+                      .group(OptionGroup.createBuilder()
+                              .name(Component.literal("Rare Item Scaling"))
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.rareScaleEnabled.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Enable increased scale for rare items such as neth and custom enchants."
+                                              ))
+                                              .build())
+                                      .binding(false, Config::isRareItemScaling, Config::toggleRareItemScaling)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .option(Option.<Float>createBuilder()
+                                      .name(Component.translatable("lsu.option.rareScale.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Increased scale of the rare items."
+                                              ))
+                                              .build())
+                                      .binding(2.0f, Config::getRareItemScaling, Config::setRareItemScaling)
+                                      .controller(opt -> FloatSliderControllerBuilder.create(opt)
+                                              .range(0.5f, 5.0f)
+                                              .step(0.1f)
+                                              .valueFormatter(val -> Component.literal(val + "x")))
+                                      .build()
+                              )
+                              .build()
+                      )
+                      .build()
+              )
+              // category 4: fun & customization
+              .category(ConfigCategory.createBuilder()
+                      .name(Component.literal("Fun & Customization"))
+                      .group(OptionGroup.createBuilder()
+                              .name(Component.literal("Title Screen"))
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.quickJoinButtonEnabled.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Enables a Quick Join button on the title screen that connects you to lifesteal.net automatically."
+                                              ))
+                                              .build())
+                                      .binding(true, Config::getQuickJoinButtonEnabled, Config::setQuickJoinButtonEnabled)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.customSplashes.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Enables custom LSN-related splash texts in the main menu. Submit new ones at https://discord.gg/qmWYNtRzEg :)"
+                                              ))
+                                              .build())
+                                      .binding(true, Config::getCustomSplashes, Config::setCustomSplashes)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .build()
+                      )
+                      .group(OptionGroup.createBuilder()
+                              .name(Component.literal("Simplifications"))
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.disableChatTags.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Disables chat tags, such as [No-Life] from appearing in messages for visual simplicity."
+                                              ))
+                                              .build())
+                                      .binding(false, Config::getDisableChatTags, Config::setDisableChatTags)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.removeUniquePlusColor.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Removes the unique coloring of the plus in LSN+ for visual simplicity.\n\nExample:\n<dark_gray>[</dark_gray><bold><#FF7200>HEROIC</#FF7200></bold><green>+</green><dark_gray>]</dark_gray> becomes <dark_gray>[</dark_gray><bold><#FF7200>HEROIC+</#FF7200></bold><dark_gray>]</dark_gray>"
+                                              ))
+                                              .build())
+                                      .binding(false, Config::getRemoveUniquePlusColor, Config::setRemoveUniquePlusColor)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .build()
+                      )
+                      .group(OptionGroup.createBuilder()
+                              .name(Component.literal("Message Customization"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.pmFormatEnabled.name"))
                                       .binding(false, Config::getEnablePmFormat, Config::setEnablePmFormat)
@@ -450,87 +578,7 @@ public class Config {
                               */
                               .build()
                       )
-                      .group(OptionGroup.createBuilder()
-                              .name(Component.translatable("lsu.group.titleScreen"))
-                              .option(Option.<Boolean>createBuilder()
-                                      .name(Component.translatable("lsu.option.quickJoinButtonEnabled.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Enables a Quick Join button on the title screen that connects you to lifesteal.net automatically."
-                                              ))
-                                              .build())
-                                      .binding(true, Config::getQuickJoinButtonEnabled, Config::setQuickJoinButtonEnabled)
-                                      .controller(TickBoxControllerBuilder::create)
-                                      .build()
-                              )
-                              .option(Option.<Boolean>createBuilder()
-                                      .name(Component.translatable("lsu.option.customSplashes.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Enables custom LSN-related splash texts in the main menu. Submit new ones at https://discord.gg/qmWYNtRzEg :)"
-                                              ))
-                                              .build())
-                                      .binding(true, Config::getCustomSplashes, Config::setCustomSplashes)
-                                      .controller(TickBoxControllerBuilder::create)
-                                      .build()
-                              )
-                              .build()
-                      )
-                      .group(OptionGroup.createBuilder()
-                              .name(Component.translatable("lsu.group.rareScale"))
-                              .option(Option.<Boolean>createBuilder()
-                                      .name(Component.translatable("lsu.option.rareScaleEnabled.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Enable increased scale for rare items such as neth and custom enchants."
-                                              ))
-                                              .build())
-                                      .binding(false, Config::isRareItemScaling, Config::toggleRareItemScaling)
-                                      .controller(TickBoxControllerBuilder::create)
-                                      .build()
-                              )
-                              .option(Option.<Float>createBuilder()
-                                      .name(Component.translatable("lsu.option.rareScale.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Increased scale of the rare items."
-                                              ))
-                                              .build())
-                                      .binding(2.0f, Config::getRareItemScaling, Config::setRareItemScaling)
-                                      .controller(opt -> FloatSliderControllerBuilder.create(opt)
-                                              .range(0.5f, 5.0f)
-                                              .step(0.1f)
-                                              .valueFormatter(val -> Component.literal(val + "x")))
-                                      .build()
-                              )
-                              .build()
-                      )
-                      .group(OptionGroup.createBuilder()
-                              .name(Component.translatable("lsu.group.simplications"))
-                              .option(Option.<Boolean>createBuilder()
-                                      .name(Component.translatable("lsu.option.disableChatTags.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Disables chat tags, such as [No-Life] from appearing in messages for visual simplicity."
-                                              ))
-                                              .build())
-                                      .binding(false, Config::getDisableChatTags, Config::setDisableChatTags)
-                                      .controller(TickBoxControllerBuilder::create)
-                                      .build()
-                              )
-                              .option(Option.<Boolean>createBuilder()
-                                      .name(Component.translatable("lsu.option.removeUniquePlusColor.name"))
-                                      .description(OptionDescription.createBuilder()
-                                              .text(MessagingUtils.miniMessage(
-                                                      "Removes the unique coloring of the plus in LSN+ for visual simplicity.\n\nExample:\n<dark_gray>[</dark_gray><bold><#FF7200>HEROIC</#FF7200></bold><green>+</green><dark_gray>]</dark_gray> becomes <dark_gray>[</dark_gray><bold><#FF7200>HEROIC+</#FF7200></bold><dark_gray>]</dark_gray>"
-                                              ))
-                                              .build())
-                                      .binding(false, Config::getRemoveUniquePlusColor, Config::setRemoveUniquePlusColor)
-                                      .controller(TickBoxControllerBuilder::create)
-                                      .build()
-                              )
-                              .build()
-                      ).build()
+                      .build()
               ).build();
    }
 
