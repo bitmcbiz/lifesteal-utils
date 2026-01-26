@@ -36,7 +36,7 @@ public final class CustomSplashes implements UIEventListener {
          splashes = FALLBACK_SPLASHES;
       }
       String splash = splashes.get((int) (Math.random() * splashes.size()));
-      
+
       event.setSplashText(MessagingUtils.miniMessageToSplashSafe(splash));
    }
 }

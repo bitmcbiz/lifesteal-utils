@@ -1,6 +1,7 @@
 package dev.candycup.lifestealutils.features.combat;
 
 import dev.candycup.lifestealutils.Config;
+import dev.candycup.lifestealutils.CustomEnchantUtilities;
 import dev.candycup.lifestealutils.event.events.ClientAttackEvent;
 import dev.candycup.lifestealutils.event.events.ClientTickEvent;
 import dev.candycup.lifestealutils.event.events.DamageConfirmedEvent;
@@ -11,6 +12,7 @@ import dev.candycup.lifestealutils.event.listener.ServerEventListener;
 import dev.candycup.lifestealutils.event.listener.TickEventListener;
 import dev.candycup.lifestealutils.hud.HudElementDefinition;
 import dev.candycup.lifestealutils.hud.HudPosition;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,6 @@ public final class UnbrokenChainTracker implements CombatEventListener, TickEven
    private final HudElementDefinition hudDefinition;
 
    public UnbrokenChainTracker() {
-      Config.ensureChainCounterKnown();
       Config.ensureChainCounterFormat(DEFAULT_FORMAT);
 
       this.hudDefinition = new HudElementDefinition(
@@ -76,14 +77,13 @@ public final class UnbrokenChainTracker implements CombatEventListener, TickEven
 
    @Override
    public void onClientAttack(ClientAttackEvent event) {
-      // only track if player has unbroken chain enchant
-      net.minecraft.client.Minecraft client = net.minecraft.client.Minecraft.getInstance();
+      Minecraft client = Minecraft.getInstance();
       if (client.player == null) return;
-      if (!dev.candycup.lifestealutils.CustomEnchantUtilities.hasCustomEnchant(
+      if (!CustomEnchantUtilities.hasCustomEnchant(
               client.player.getMainHandItem(), "enchants:unbroken_chain")) {
          return;
       }
-      
+
       long now = System.currentTimeMillis();
       pendingHits.put(event.getTargetId(), now);
       LOGGER.debug("[lsu-chain] pending hit registered for entity {}", event.getTargetId());

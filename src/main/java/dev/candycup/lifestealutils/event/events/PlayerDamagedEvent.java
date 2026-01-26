@@ -8,24 +8,24 @@ import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
  * this typically resets combat tracking for the player.
  */
 public class PlayerDamagedEvent extends LSUEvent {
-    private final int entityId;
-    private final ClientboundDamageEventPacket packet;
+   private final int entityId;
+   private final ClientboundDamageEventPacket packet;
 
-    public PlayerDamagedEvent(int entityId, ClientboundDamageEventPacket packet) {
-        this.entityId = entityId;
-        this.packet = packet;
-    }
+   public PlayerDamagedEvent(int entityId, ClientboundDamageEventPacket packet) {
+      this.entityId = entityId;
+      this.packet = packet;
+   }
 
-    public int getEntityId() {
-        return entityId;
-    }
+   public int getEntityId() {
+      return entityId;
+   }
 
-    public ClientboundDamageEventPacket getPacket() {
-        return packet;
-    }
+   public ClientboundDamageEventPacket getPacket() {
+      return packet;
+   }
 
-    @Override
-    public boolean isCancellable() {
-        return false;
-    }
+   @Override
+   public boolean isCancellable() {
+      return false;
+   }
 }

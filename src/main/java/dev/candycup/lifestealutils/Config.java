@@ -104,11 +104,11 @@ public class Config {
 
    private static OptionGroup buildTimerOptions() {
       OptionGroup.Builder group = OptionGroup.createBuilder()
-              .name(Component.literal("Custom Enchant Timers"));
+              .name(Component.translatable("lsu.group.customEnchantTimers"));
 
       BasicTimerManager timerManager = LifestealUtils.getBasicTimerManager();
       if (timerManager == null) {
-         return group.build(); // not initialized yet
+         return group.build();
       }
 
       List<BasicTimerManager.TimerEntry> timers = timerManager.getTimerEntries();
@@ -148,21 +148,21 @@ public class Config {
       ensureChainCounterFormat(defaultFormat);
 
       return OptionGroup.createBuilder()
-              .name(Component.literal("Unbroken Chain Counter"))
+              .name(Component.translatable("lsu.group.chainCounter"))
               .option(Option.<Boolean>createBuilder()
-                      .name(Component.literal("Enable Chain Counter"))
+                      .name(Component.translatable("lsu.option.chainCounterEnabled.name"))
                       .description(OptionDescription.createBuilder()
                               .text(MessagingUtils.miniMessage(
-                                          "Tracks consecutive hits without receiving damage.\n\n" +
-                                             "Each consecutive hit grants +5% bonus damage, capping at 50%.\n" +
-                                             "Bonus starts on the 3rd hit and the chain resets after 5 seconds without a hit."
+                                      "Tracks consecutive hits without receiving damage.\n\n" +
+                                              "Each consecutive hit grants +5% bonus damage, capping at 50%.\n" +
+                                              "Bonus starts on the 3rd hit and the chain resets after 5 seconds without a hit."
                               ))
                               .build())
                       .binding(false, Config::isChainCounterEnabled, Config::setChainCounterEnabled)
                       .controller(TickBoxControllerBuilder::create)
                       .build())
               .option(Option.<String>createBuilder()
-                      .name(Component.literal("Chain Counter Format"))
+                      .name(Component.translatable("lsu.option.chainCounterFormat.name"))
                       .description(OptionDescription.createBuilder()
                               .text(MessagingUtils.miniMessage(
                                       "Customize the chain counter display format.\n\n" +
@@ -366,10 +366,6 @@ public class Config {
       HANDLER.save();
    }
 
-   public static void ensureChainCounterKnown() {
-      // no-op, field has default value
-   }
-
    public static String getChainCounterFormat(String fallback) {
       if (chainCounterFormat == null || chainCounterFormat.isBlank()) {
          return fallback;
@@ -406,18 +402,16 @@ public class Config {
       FeatureFlagController.ensureLoaded();
       return YetAnotherConfigLib.createBuilder()
               .title(Component.translatable("lsu.name"))
-              // category 1: timers & counters
               .category(ConfigCategory.createBuilder()
-                      .name(Component.literal("Timers & Counters"))
+                      .name(Component.translatable("lsu.category.timersCounters"))
                       .group(buildTimerOptions())
                       .group(buildChainCounterOptions())
                       .build()
               )
-              // category 2: alliances
               .category(ConfigCategory.createBuilder()
-                      .name(Component.literal("Alliances"))
+                      .name(Component.translatable("lsu.category.alliances"))
                       .group(OptionGroup.createBuilder()
-                              .name(Component.literal("Alliance Settings"))
+                              .name(Component.translatable("lsu.group.allianceSettings"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.enableAlliances.name"))
                                       .description(descriptionWithRemoteReasoning(
@@ -444,13 +438,12 @@ public class Config {
                       )
                       .build()
               )
-              // category 3: quality of life
               .category(ConfigCategory.createBuilder()
-                      .name(Component.literal("Quality of Life"))
+                      .name(Component.translatable("lsu.category.qol"))
                       .group(OptionGroup.createBuilder()
-                              .name(Component.literal("Auto-Join"))
+                              .name(Component.translatable("lsu.group.autoJoin"))
                               .option(Option.<Boolean>createBuilder()
-                                      .name(Component.literal("Auto-Join Lifesteal on Hub"))
+                                      .name(Component.translatable("lsu.option.autoJoinLifesteal.name"))
                                       .description(OptionDescription.createBuilder()
                                               .text(MessagingUtils.miniMessage(
                                                       "Automatically joins the Lifesteal gamemode on lifesteal.net when you join the main hub.\n\nExecutes /joinlifesteal after a second of joining the hub."
@@ -463,7 +456,7 @@ public class Config {
                               .build()
                       )
                       .group(OptionGroup.createBuilder()
-                              .name(Component.literal("Rare Item Scaling"))
+                              .name(Component.translatable("lsu.group.rareItemScaling"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.rareScaleEnabled.name"))
                                       .description(OptionDescription.createBuilder()
@@ -493,11 +486,10 @@ public class Config {
                       )
                       .build()
               )
-              // category 4: fun & customization
               .category(ConfigCategory.createBuilder()
-                      .name(Component.literal("Fun & Customization"))
+                      .name(Component.translatable("lsu.category.funCustomization"))
                       .group(OptionGroup.createBuilder()
-                              .name(Component.literal("Title Screen"))
+                              .name(Component.translatable("lsu.group.titleScreen"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.quickJoinButtonEnabled.name"))
                                       .description(OptionDescription.createBuilder()
@@ -521,7 +513,7 @@ public class Config {
                                       .build()
                               )
                               .option(Option.<Boolean>createBuilder()
-                                      .name(Component.literal("Lobby Panorama"))
+                                      .name(Component.translatable("lsu.option.lobbyPanorama.name"))
                                       .description(OptionDescription.createBuilder()
                                               .text(MessagingUtils.miniMessage(
                                                       "Enables a panorama of the Lifesteal 2.0 lobby on the title screen."
@@ -534,7 +526,7 @@ public class Config {
                               .build()
                       )
                       .group(OptionGroup.createBuilder()
-                              .name(Component.literal("Simplifications"))
+                              .name(Component.translatable("lsu.group.simplifications"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.disableChatTags.name"))
                                       .description(OptionDescription.createBuilder()
@@ -560,7 +552,7 @@ public class Config {
                               .build()
                       )
                       .group(OptionGroup.createBuilder()
-                              .name(Component.literal("Message Customization"))
+                              .name(Component.translatable("lsu.group.messageCustomization"))
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.pmFormatEnabled.name"))
                                       .binding(false, Config::getEnablePmFormat, Config::setEnablePmFormat)

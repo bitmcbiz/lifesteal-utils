@@ -30,12 +30,11 @@ public class ItemRendererMixin {
       ItemClusterRenderStateDuck duck = (ItemClusterRenderStateDuck) state;
       ItemStack itemStack = duck.lifestealutils$getItemStack();
       boolean isRare = duck.lifestealutils$isRare();
-      
+
       ItemRenderEvent event = new ItemRenderEvent(itemStack, poseStack, isRare);
       EventBus.getInstance().post(event);
       if (event.isCancelled()) {
          ci.cancel();
-         return;
       }
    }
 

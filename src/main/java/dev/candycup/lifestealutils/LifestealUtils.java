@@ -9,6 +9,7 @@ import dev.candycup.lifestealutils.features.items.RareItemHighlight;
 import dev.candycup.lifestealutils.features.messages.ChatTagRemover;
 import dev.candycup.lifestealutils.features.messages.PrivateMessageFormatter;
 import dev.candycup.lifestealutils.features.messages.RankPlusColorNormalizer;
+import dev.candycup.lifestealutils.features.qol.AutoJoinLifesteal;
 import dev.candycup.lifestealutils.features.titlescreen.CustomSplashes;
 import dev.candycup.lifestealutils.features.titlescreen.QuickJoinButton;
 import dev.candycup.lifestealutils.hud.HudDisplayLayer;
@@ -30,6 +31,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
@@ -48,7 +50,7 @@ public final class LifestealUtils implements ClientModInitializer {
    private static KeyMapping addAllianceTargetKeyBinding;
    private static int pendingConfigOpenTicks = -1;
    private static int pendingHudEditorOpenTicks = -1;
-   
+
    private static UnbrokenChainTracker unbrokenChainTracker;
    private static BasicTimerManager basicTimerManager;
    private static PrivateMessageFormatter privateMessageFormatter;
@@ -58,7 +60,7 @@ public final class LifestealUtils implements ClientModInitializer {
    private static RareItemHighlight rareItemHighlight;
    private static QuickJoinButton quickJoinButton;
    private static CustomSplashes customSplashes;
-   private static dev.candycup.lifestealutils.features.qol.AutoJoinLifesteal autoJoinLifesteal;
+   private static AutoJoinLifesteal autoJoinLifesteal;
 
    @Override
    public void onInitializeClient() {
@@ -66,8 +68,7 @@ public final class LifestealUtils implements ClientModInitializer {
       Config.load();
 
       HudElementManager.init();
-      
-      // initialize and register event-based features
+
       basicTimerManager = new BasicTimerManager(FeatureFlagController.getBasicTimers());
       EventBus.getInstance().register(basicTimerManager);
       for (HudElementDefinition definition : basicTimerManager.getHudDefinitions()) {
@@ -77,33 +78,29 @@ public final class LifestealUtils implements ClientModInitializer {
       unbrokenChainTracker = new UnbrokenChainTracker();
       EventBus.getInstance().register(unbrokenChainTracker);
       HudElementManager.register(unbrokenChainTracker.getHudDefinition());
-      
-      // chat message features - each is independent and modular
-      privateMessageFormatter = new dev.candycup.lifestealutils.features.messages.PrivateMessageFormatter();
+
+      privateMessageFormatter = new PrivateMessageFormatter();
       EventBus.getInstance().register(privateMessageFormatter);
-      
-      chatTagRemover = new dev.candycup.lifestealutils.features.messages.ChatTagRemover();
+
+      chatTagRemover = new ChatTagRemover();
       EventBus.getInstance().register(chatTagRemover);
-      
-      rankPlusColorNormalizer = new dev.candycup.lifestealutils.features.messages.RankPlusColorNormalizer();
+
+      rankPlusColorNormalizer = new RankPlusColorNormalizer();
       EventBus.getInstance().register(rankPlusColorNormalizer);
-      
-      // render-based features (performance-critical)
+
       alliances = new Alliances();
       EventBus.getInstance().register(alliances);
-      
-      rareItemHighlight = new dev.candycup.lifestealutils.features.items.RareItemHighlight();
+
+      rareItemHighlight = new RareItemHighlight();
       EventBus.getInstance().register(rareItemHighlight);
-      
-      // UI features
-      quickJoinButton = new dev.candycup.lifestealutils.features.titlescreen.QuickJoinButton();
+
+      quickJoinButton = new QuickJoinButton();
       EventBus.getInstance().register(quickJoinButton);
-      
-      customSplashes = new dev.candycup.lifestealutils.features.titlescreen.CustomSplashes();
+
+      customSplashes = new CustomSplashes();
       EventBus.getInstance().register(customSplashes);
-      
-      // quality of life features
-      autoJoinLifesteal = new dev.candycup.lifestealutils.features.qol.AutoJoinLifesteal();
+
+      autoJoinLifesteal = new AutoJoinLifesteal();
       EventBus.getInstance().register(autoJoinLifesteal);
 
       HudElementRegistry.attachElementAfter(
@@ -149,9 +146,8 @@ public final class LifestealUtils implements ClientModInitializer {
       *///?}
 
       ClientTickEvents.END_CLIENT_TICK.register(client -> {
-         // post tick event to event-based features
          EventBus.getInstance().post(new ClientTickEvent(client));
-         
+
          if (client.player == null) return;
          if (pendingConfigOpenTicks >= 0) {
             if (pendingConfigOpenTicks == 0) {
@@ -165,7 +161,7 @@ public final class LifestealUtils implements ClientModInitializer {
             if (pendingHudEditorOpenTicks == 0) {
                if (client.screen == null) {
                   client.setScreen(new HudElementEditor(
-                          net.minecraft.network.chat.Component.literal("HUD Element Editor")
+                          Component.translatable("lsu.screen.hudEditor")
                   ));
                }
                pendingHudEditorOpenTicks = -1;
@@ -215,7 +211,7 @@ public final class LifestealUtils implements ClientModInitializer {
                          .then(ClientCommandManager.literal("edit-hud")
                                  .executes(commandContext -> {
                                     Minecraft client = Minecraft.getInstance();
-                               client.execute(() -> pendingHudEditorOpenTicks = 1);
+                                    client.execute(() -> pendingHudEditorOpenTicks = 1);
                                     return 1;
                                  }))
                          .then(ClientCommandManager.literal("alliances")

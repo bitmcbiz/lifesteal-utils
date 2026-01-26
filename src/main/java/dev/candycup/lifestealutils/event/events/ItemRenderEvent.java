@@ -14,30 +14,30 @@ import net.minecraft.world.item.ItemStack;
  * features can modify the poseStack to apply transforms (e.g., scaling).
  */
 public class ItemRenderEvent extends LSUEvent {
-    private final ItemStack itemStack;
-    private final PoseStack poseStack;
-    private final boolean isRare;
+   private final ItemStack itemStack;
+   private final PoseStack poseStack;
+   private final boolean isRare;
 
-    public ItemRenderEvent(ItemStack itemStack, PoseStack poseStack, boolean isRare) {
-        this.itemStack = itemStack;
-        this.poseStack = poseStack;
-        this.isRare = isRare;
-    }
+   public ItemRenderEvent(ItemStack itemStack, PoseStack poseStack, boolean isRare) {
+      this.itemStack = itemStack;
+      this.poseStack = poseStack;
+      this.isRare = isRare;
+   }
 
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
+   @Override
+   public boolean isCancellable() {
+      return true;
+   }
 
-    public ItemStack getItemStack() {
-        return itemStack;
-    }
+   public ItemStack getItemStack() {
+      return itemStack;
+   }
 
-    public PoseStack getPoseStack() {
-        return poseStack;
-    }
+   public PoseStack getPoseStack() {
+      return poseStack;
+   }
 
-    public boolean isRare() {
-        return isRare;
-    }
+   public boolean isRare() {
+      return isRare;
+   }
 }

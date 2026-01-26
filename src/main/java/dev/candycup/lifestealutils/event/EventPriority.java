@@ -5,17 +5,17 @@ package dev.candycup.lifestealutils.event;
  * listeners with higher priority execute first.
  */
 public enum EventPriority {
-    LOW(0),
-    NORMAL(100),
-    HIGH(200);
+   LOW(0),
+   NORMAL(100),
+   HIGH(200);
 
-    private final int value;
+   private final int value;
 
-    EventPriority(int value) {
-        this.value = value;
-    }
+   EventPriority(int value) {
+      this.value = value;
+   }
 
-    public int getValue() {
-        return value;
-    }
+   public int getValue() {
+      return value;
+   }
 }

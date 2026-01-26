@@ -7,37 +7,37 @@ import dev.candycup.lifestealutils.event.LSUEvent;
  * used for feature lifecycle management and state cleanup.
  */
 public class ServerChangeEvent extends LSUEvent {
-    private final Type type;
-    private final String serverAddress;
+   private final Type type;
+   private final String serverAddress;
 
-    public enum Type {
-        CONNECTED,
-        DISCONNECTED
-    }
+   public enum Type {
+      CONNECTED,
+      DISCONNECTED
+   }
 
-    public ServerChangeEvent(Type type, String serverAddress) {
-        this.type = type;
-        this.serverAddress = serverAddress;
-    }
+   public ServerChangeEvent(Type type, String serverAddress) {
+      this.type = type;
+      this.serverAddress = serverAddress;
+   }
 
-    public Type getType() {
-        return type;
-    }
+   public Type getType() {
+      return type;
+   }
 
-    public String getServerAddress() {
-        return serverAddress;
-    }
+   public String getServerAddress() {
+      return serverAddress;
+   }
 
-    public boolean isConnected() {
-        return type == Type.CONNECTED;
-    }
+   public boolean isConnected() {
+      return type == Type.CONNECTED;
+   }
 
-    public boolean isDisconnected() {
-        return type == Type.DISCONNECTED;
-    }
+   public boolean isDisconnected() {
+      return type == Type.DISCONNECTED;
+   }
 
-    @Override
-    public boolean isCancellable() {
-        return false;
-    }
+   @Override
+   public boolean isCancellable() {
+      return false;
+   }
 }

@@ -21,48 +21,48 @@ import net.minecraft.resources.Identifier;
  */
 public final class QuickJoinButton implements UIEventListener {
 
-    @Override
-    public boolean isEnabled() {
-        return Config.getQuickJoinButtonEnabled();
-    }
+   @Override
+   public boolean isEnabled() {
+      return Config.getQuickJoinButtonEnabled();
+   }
 
-    @Override
-    public EventPriority getPriority() {
-        return EventPriority.NORMAL;
-    }
+   @Override
+   public EventPriority getPriority() {
+      return EventPriority.NORMAL;
+   }
 
-    @Override
-    public void onTitleScreenInit(TitleScreenInitEvent event) {
-        TitleScreen screen = event.getTitleScreen();
-        
-        int l = screen.height / 4 + 48;
-        SpriteIconButton button = ((ScreenAccessor) screen).invokeAddRenderableWidget(
-                SpriteIconButton.builder(
-                        Component.translatable("menu.options"),
-                        (buttonWidget) -> {
-                            Minecraft mc = Minecraft.getInstance();
-                            JoinMultiplayerScreen join = new JoinMultiplayerScreen(screen);
-                            mc.setScreen(join);
-                            ConnectScreen.startConnecting(
-                                    join,
-                                    mc,
-                                    ServerAddress.parseString("lifesteal.net"),
-                                    new ServerData(
-                                            "Lifesteal Network",
-                                            "lifesteal.net",
-                                            ServerData.Type.OTHER
-                                    ),
-                                    true,
-                                    null
-                            );
-                        },
-                        true
-                ).width(20).sprite(
-                        Identifier.fromNamespaceAndPath("lifestealutils", "icon/lsn"),
-                        22,
-                        22
-                ).build()
-        );
-        button.setPosition(screen.width / 2 + 104, l);
-    }
+   @Override
+   public void onTitleScreenInit(TitleScreenInitEvent event) {
+      TitleScreen screen = event.getTitleScreen();
+
+      int l = screen.height / 4 + 48;
+      SpriteIconButton button = ((ScreenAccessor) screen).invokeAddRenderableWidget(
+              SpriteIconButton.builder(
+                      Component.translatable("menu.options"),
+                      (buttonWidget) -> {
+                         Minecraft mc = Minecraft.getInstance();
+                         JoinMultiplayerScreen join = new JoinMultiplayerScreen(screen);
+                         mc.setScreen(join);
+                         ConnectScreen.startConnecting(
+                                 join,
+                                 mc,
+                                 ServerAddress.parseString("lifesteal.net"),
+                                 new ServerData(
+                                         "Lifesteal Network",
+                                         "lifesteal.net",
+                                         ServerData.Type.OTHER
+                                 ),
+                                 true,
+                                 null
+                         );
+                      },
+                      true
+              ).width(20).sprite(
+                      Identifier.fromNamespaceAndPath("lifestealutils", "icon/lsn"),
+                      18,
+                      18
+              ).build()
+      );
+      button.setPosition(screen.width / 2 + 104, l);
+   }
 }

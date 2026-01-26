@@ -8,33 +8,33 @@ import net.minecraft.network.chat.Component;
  * can be cancelled to prevent the message from being displayed.
  */
 public class ChatMessageReceivedEvent extends LSUEvent {
-    private final Component message;
-    private Component modifiedMessage;
+   private final Component message;
+   private Component modifiedMessage;
 
-    public ChatMessageReceivedEvent(Component message) {
-        this.message = message;
-        this.modifiedMessage = message;
-    }
+   public ChatMessageReceivedEvent(Component message) {
+      this.message = message;
+      this.modifiedMessage = message;
+   }
 
-    public Component getMessage() {
-        return message;
-    }
+   public Component getMessage() {
+      return message;
+   }
 
-    public Component getModifiedMessage() {
-        return modifiedMessage;
-    }
+   public Component getModifiedMessage() {
+      return modifiedMessage;
+   }
 
-    /**
-     * modify the chat message that will be displayed.
-     * 
-     * @param modifiedMessage the new message to display
-     */
-    public void setModifiedMessage(Component modifiedMessage) {
-        this.modifiedMessage = modifiedMessage != null ? modifiedMessage : message;
-    }
+   /**
+    * modify the chat message that will be displayed.
+    *
+    * @param modifiedMessage the new message to display
+    */
+   public void setModifiedMessage(Component modifiedMessage) {
+      this.modifiedMessage = modifiedMessage != null ? modifiedMessage : message;
+   }
 
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
+   @Override
+   public boolean isCancellable() {
+      return true;
+   }
 }

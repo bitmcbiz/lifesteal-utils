@@ -8,11 +8,12 @@ import dev.candycup.lifestealutils.event.events.ServerChangeEvent;
  */
 public interface ServerEventListener extends LifestealEventListener {
 
-    /**
-     * called when the player connects to or disconnects from a server.
-     * use for feature lifecycle management and state cleanup.
-     *
-     * @param event the server change event
-     */
-    default void onServerChange(ServerChangeEvent event) {}
+   /**
+    * called when the player connects to or disconnects from a server.
+    * use for feature lifecycle management and state cleanup.
+    *
+    * @param event the server change event
+    */
+   default void onServerChange(ServerChangeEvent event) {
+   }
 }

@@ -11,70 +11,70 @@ import dev.candycup.lifestealutils.event.events.*;
  */
 public interface LifestealEventListener {
 
-    /**
-     * @return the priority of this listener (higher priority executes first)
-     */
-    default EventPriority getPriority() {
-        return EventPriority.NORMAL;
-    }
+   /**
+    * @return the priority of this listener (higher priority executes first)
+    */
+   default EventPriority getPriority() {
+      return EventPriority.NORMAL;
+   }
 
-    /**
-     * @return true if this listener should receive events (checks config)
-     */
-    boolean isEnabled();
+   /**
+    * @return true if this listener should receive events (checks config)
+    */
+   boolean isEnabled();
 
-    /**
-     * internal method to dispatch events to the appropriate handler.
-     * do not override this method - implement specific listener interfaces instead.
-     *
-     * @param event the event to handle
-     */
-    default void handleEvent(LSUEvent event) {
-        // dispatch to specific handler based on event type
-        if (this instanceof CombatEventListener combatListener) {
-            if (event instanceof ClientAttackEvent e) {
-                combatListener.onClientAttack(e);
-            } else if (event instanceof DamageConfirmedEvent e) {
-                combatListener.onDamageConfirmed(e);
-            } else if (event instanceof PlayerDamagedEvent e) {
-                combatListener.onPlayerDamaged(e);
-            }
-        }
+   /**
+    * internal method to dispatch events to the appropriate handler.
+    * do not override this method - implement specific listener interfaces instead.
+    *
+    * @param event the event to handle
+    */
+   default void handleEvent(LSUEvent event) {
+      // dispatch to specific handler based on event type
+      if (this instanceof CombatEventListener combatListener) {
+         if (event instanceof ClientAttackEvent e) {
+            combatListener.onClientAttack(e);
+         } else if (event instanceof DamageConfirmedEvent e) {
+            combatListener.onDamageConfirmed(e);
+         } else if (event instanceof PlayerDamagedEvent e) {
+            combatListener.onPlayerDamaged(e);
+         }
+      }
 
-        if (this instanceof ChatEventListener chatListener) {
-            if (event instanceof ChatMessageReceivedEvent e) {
-                chatListener.onChatMessageReceived(e);
-            } else if (event instanceof ChatMessageSentEvent e) {
-                chatListener.onChatMessageSent(e);
-            }
-        }
+      if (this instanceof ChatEventListener chatListener) {
+         if (event instanceof ChatMessageReceivedEvent e) {
+            chatListener.onChatMessageReceived(e);
+         } else if (event instanceof ChatMessageSentEvent e) {
+            chatListener.onChatMessageSent(e);
+         }
+      }
 
-        if (this instanceof TickEventListener tickListener) {
-            if (event instanceof ClientTickEvent e) {
-                tickListener.onClientTick(e);
-            }
-        }
+      if (this instanceof TickEventListener tickListener) {
+         if (event instanceof ClientTickEvent e) {
+            tickListener.onClientTick(e);
+         }
+      }
 
-        if (this instanceof ServerEventListener serverListener) {
-            if (event instanceof ServerChangeEvent e) {
-                serverListener.onServerChange(e);
-            }
-        }
+      if (this instanceof ServerEventListener serverListener) {
+         if (event instanceof ServerChangeEvent e) {
+            serverListener.onServerChange(e);
+         }
+      }
 
-        if (this instanceof RenderEventListener renderListener) {
-            if (event instanceof ItemRenderEvent e) {
-                renderListener.onItemRender(e);
-            } else if (event instanceof PlayerNameRenderEvent e) {
-                renderListener.onPlayerNameRender(e);
-            }
-        }
+      if (this instanceof RenderEventListener renderListener) {
+         if (event instanceof ItemRenderEvent e) {
+            renderListener.onItemRender(e);
+         } else if (event instanceof PlayerNameRenderEvent e) {
+            renderListener.onPlayerNameRender(e);
+         }
+      }
 
-        if (this instanceof UIEventListener uiListener) {
-            if (event instanceof TitleScreenInitEvent e) {
-                uiListener.onTitleScreenInit(e);
-            } else if (event instanceof SplashTextRequestEvent e) {
-                uiListener.onSplashTextRequest(e);
-            }
-        }
-    }
+      if (this instanceof UIEventListener uiListener) {
+         if (event instanceof TitleScreenInitEvent e) {
+            uiListener.onTitleScreenInit(e);
+         } else if (event instanceof SplashTextRequestEvent e) {
+            uiListener.onSplashTextRequest(e);
+         }
+      }
+   }
 }

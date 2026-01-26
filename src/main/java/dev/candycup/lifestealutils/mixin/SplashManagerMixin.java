@@ -2,6 +2,7 @@ package dev.candycup.lifestealutils.mixin;
 
 import dev.candycup.lifestealutils.event.EventBus;
 import dev.candycup.lifestealutils.event.events.SplashTextRequestEvent;
+import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import net.minecraft.client.gui.components.SplashRenderer;
 import net.minecraft.client.resources.SplashManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +20,7 @@ public class SplashManagerMixin {
       if (event.getSplashText() != null) {
          cir.setReturnValue(new SplashRenderer(
                  //? if > 1.21.10 {
-                 dev.candycup.lifestealutils.interapi.MessagingUtils.miniMessage(
+                 MessagingUtils.miniMessage(
                          "<yellow>" + event.getSplashText() + "</yellow>"
                  )
                  //? } else {

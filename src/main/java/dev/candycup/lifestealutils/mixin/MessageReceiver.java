@@ -22,7 +22,7 @@ public class MessageReceiver {
 
    @Unique
    private static final ThreadLocal<Boolean> lifestealutils$reentrant =
-         ThreadLocal.withInitial(() -> false);
+           ThreadLocal.withInitial(() -> false);
 
    @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/network/chat/Component;)V", cancellable = true)
    private void addMessage(Component component, CallbackInfo ci) {
@@ -34,17 +34,14 @@ public class MessageReceiver {
          return;
       }
 
-      // post chat message received event
       ChatMessageReceivedEvent event = new ChatMessageReceivedEvent(component);
       EventBus.getInstance().post(event);
 
-      // if any feature cancelled the event, prevent the original message
       if (event.isCancelled()) {
          ci.cancel();
          return;
       }
 
-      // if the message was modified, show the modified version instead
       Component modified = event.getModifiedMessage();
       if (modified != null && modified != component) {
          ci.cancel();

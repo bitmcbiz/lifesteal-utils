@@ -8,11 +8,12 @@ import dev.candycup.lifestealutils.event.events.ClientTickEvent;
  */
 public interface TickEventListener extends LifestealEventListener {
 
-    /**
-     * called every client tick (20 times per second).
-     * use for periodic updates and state management.
-     *
-     * @param event the tick event
-     */
-    default void onClientTick(ClientTickEvent event) {}
+   /**
+    * called every client tick (20 times per second).
+    * use for periodic updates and state management.
+    *
+    * @param event the tick event
+    */
+   default void onClientTick(ClientTickEvent event) {
+   }
 }

@@ -44,15 +44,11 @@ public final class Alliances implements RenderEventListener {
 
    @Override
    public void onPlayerNameRender(PlayerNameRenderEvent event) {
-      // short-circuit if not an alliance member
       if (!isAlliedName(event.getPlayerName())) return;
 
-      // colorize the name tag
       Component modified = colorizeNameTag(event.getModifiedDisplayName());
       event.setModifiedDisplayName(modified);
    }
-
-   // ===== static API for commands and management =====
 
    public static void showAllianceList() {
       List<String> entries = getAllianceDisplayNames();
@@ -84,7 +80,6 @@ public final class Alliances implements RenderEventListener {
       if (uuid == null) return false;
       boolean added = addAllianceUuid(uuid);
       if (added) {
-         // cache the username from the player
          Component nameComponent = player.getName();
          if (nameComponent != null) {
             String name = nameComponent.getString();
@@ -304,14 +299,12 @@ public final class Alliances implements RenderEventListener {
       ClientPacketListener connection = Minecraft.getInstance().getConnection();
       for (String id : Config.getAllianceUuids()) {
          String name = null;
-         // First try to get name from online players
          if (connection != null) {
             for (PlayerInfo info : connection.getOnlinePlayers()) {
                if (info == null || info.getProfile() == null) continue;
                UUID uuid = getProfileId(info);
                if (uuid != null && id.equals(uuid.toString())) {
                   name = getProfileName(info);
-                  // Update cache with fresh online data
                   if (name != null) {
                      UuidResolver.updateCache(uuid, name);
                   }
@@ -319,7 +312,6 @@ public final class Alliances implements RenderEventListener {
                }
             }
          }
-         // Fall back to cached username
          if (name == null) {
             name = UuidResolver.getCachedUsername(id);
          }

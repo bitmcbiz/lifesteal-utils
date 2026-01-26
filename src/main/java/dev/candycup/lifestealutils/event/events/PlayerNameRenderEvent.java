@@ -12,43 +12,43 @@ import net.minecraft.network.chat.Component;
  * features can modify the display name by setting a new value.
  */
 public class PlayerNameRenderEvent extends LSUEvent {
-    private final String playerName;
-    private final Component originalDisplayName;
-    private Component modifiedDisplayName;
+   private final String playerName;
+   private final Component originalDisplayName;
+   private Component modifiedDisplayName;
 
-    public PlayerNameRenderEvent(String playerName, Component originalDisplayName) {
-        this.playerName = playerName;
-        this.originalDisplayName = originalDisplayName;
-        this.modifiedDisplayName = originalDisplayName;
-    }
+   public PlayerNameRenderEvent(String playerName, Component originalDisplayName) {
+      this.playerName = playerName;
+      this.originalDisplayName = originalDisplayName;
+      this.modifiedDisplayName = originalDisplayName;
+   }
 
-    /**
-     * @return the plain username of the player
-     */
-    public String getPlayerName() {
-        return playerName;
-    }
+   /**
+    * @return the plain username of the player
+    */
+   public String getPlayerName() {
+      return playerName;
+   }
 
-    /**
-     * @return the original unmodified display name
-     */
-    public Component getOriginalDisplayName() {
-        return originalDisplayName;
-    }
+   /**
+    * @return the original unmodified display name
+    */
+   public Component getOriginalDisplayName() {
+      return originalDisplayName;
+   }
 
-    /**
-     * @return the current display name (may be modified by previous listeners)
-     */
-    public Component getModifiedDisplayName() {
-        return modifiedDisplayName;
-    }
+   /**
+    * @return the current display name (may be modified by previous listeners)
+    */
+   public Component getModifiedDisplayName() {
+      return modifiedDisplayName;
+   }
 
-    /**
-     * set a modified display name. subsequent listeners will see this modified version.
-     *
-     * @param displayName the new display name
-     */
-    public void setModifiedDisplayName(Component displayName) {
-        this.modifiedDisplayName = displayName != null ? displayName : originalDisplayName;
-    }
+   /**
+    * set a modified display name. subsequent listeners will see this modified version.
+    *
+    * @param displayName the new display name
+    */
+   public void setModifiedDisplayName(Component displayName) {
+      this.modifiedDisplayName = displayName != null ? displayName : originalDisplayName;
+   }
 }

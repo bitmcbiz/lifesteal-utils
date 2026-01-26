@@ -26,14 +26,12 @@ public abstract class AttackTrackerMixin {
    private void onAttack(Player player, Entity target, CallbackInfo ci) {
       if (!LifestealServerDetector.isOnLifestealServer()) return;
       if (minecraft.player == null) return;
-      // only track attacks by the local player
       if (player != minecraft.player) return;
       if (!(target instanceof Player)) return;
 
       ClientAttackEvent event = new ClientAttackEvent(target, System.currentTimeMillis());
       EventBus.getInstance().post(event);
-      
-      // allow features to cancel the attack
+
       if (event.isCancelled()) {
          ci.cancel();
       }

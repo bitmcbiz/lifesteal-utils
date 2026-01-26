@@ -8,28 +8,28 @@ import net.minecraft.world.entity.Entity;
  * posted before server confirmation.
  */
 public class ClientAttackEvent extends LSUEvent {
-    private final Entity target;
-    private final long timestamp;
+   private final Entity target;
+   private final long timestamp;
 
-    public ClientAttackEvent(Entity target, long timestamp) {
-        this.target = target;
-        this.timestamp = timestamp;
-    }
+   public ClientAttackEvent(Entity target, long timestamp) {
+      this.target = target;
+      this.timestamp = timestamp;
+   }
 
-    public Entity getTarget() {
-        return target;
-    }
+   public Entity getTarget() {
+      return target;
+   }
 
-    public int getTargetId() {
-        return target != null ? target.getId() : -1;
-    }
+   public int getTargetId() {
+      return target != null ? target.getId() : -1;
+   }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
+   public long getTimestamp() {
+      return timestamp;
+   }
 
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
+   @Override
+   public boolean isCancellable() {
+      return true;
+   }
 }

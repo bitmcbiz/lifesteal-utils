@@ -49,7 +49,6 @@ public abstract class TabListMixin {
    private void decorateNameHead(PlayerInfo playerInfo, MutableComponent mutableComponent, CallbackInfoReturnable<Component> cir) {
       Component result = mutableComponent;
 
-      // handle rank plus color normalization
       if (Config.getRemoveUniquePlusColor() && LifestealServerDetector.isOnLifestealServer()) {
          String serialized = MiniMessage.miniMessage().serialize(MinecraftClientAudiences.of().asAdventure(result));
 
@@ -63,7 +62,6 @@ public abstract class TabListMixin {
          result = MessagingUtils.miniMessage(serialized);
       }
 
-      // post name render event for alliance coloring and other modifications
       //? if > 1.21.8 {
       String plainName = playerInfo.getProfile().name();
       //?} else {

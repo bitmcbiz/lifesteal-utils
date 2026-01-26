@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 public final class BasicTimerManager implements ChatEventListener, TickEventListener {
    private static final Logger LOGGER = LoggerFactory.getLogger("lifestealutils/timers");
-   
+
    private final Map<String, BasicTimerDefinition> definitions = new LinkedHashMap<>();
    private final Map<String, TimerState> states = new LinkedHashMap<>();
    private final Map<String, HudElementDefinition> hudDefinitions = new LinkedHashMap<>();
@@ -72,16 +72,16 @@ public final class BasicTimerManager implements ChatEventListener, TickEventList
    public boolean isEnabled() {
       // enabled if any timer is enabled
       return definitions.keySet().stream()
-          .anyMatch(Config::isBasicTimerEnabled);
+              .anyMatch(Config::isBasicTimerEnabled);
    }
 
    @Override
    public void onChatMessageReceived(ChatMessageReceivedEvent event) {
       String message = event.getMessage().getString();
-      if (message == null || message.isBlank()) {
+      if (message.isBlank()) {
          return;
       }
-      
+
       for (Map.Entry<String, BasicTimerDefinition> entry : definitions.entrySet()) {
          BasicTimerDefinition definition = entry.getValue();
          if (definition.chatTrigger() != null && message.contains(definition.chatTrigger())) {

@@ -7,18 +7,18 @@ import dev.candycup.lifestealutils.event.LSUEvent;
  * can be cancelled to prevent the message from being sent.
  */
 public class ChatMessageSentEvent extends LSUEvent {
-    private final String message;
+   private final String message;
 
-    public ChatMessageSentEvent(String message) {
-        this.message = message;
-    }
+   public ChatMessageSentEvent(String message) {
+      this.message = message;
+   }
 
-    public String getMessage() {
-        return message;
-    }
+   public String getMessage() {
+      return message;
+   }
 
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
+   @Override
+   public boolean isCancellable() {
+      return true;
+   }
 }

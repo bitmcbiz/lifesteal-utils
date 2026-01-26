@@ -8,13 +8,13 @@ import net.minecraft.client.gui.screens.TitleScreen;
  * features can use this to add custom buttons or modify the screen.
  */
 public class TitleScreenInitEvent extends LSUEvent {
-    private final TitleScreen titleScreen;
+   private final TitleScreen titleScreen;
 
-    public TitleScreenInitEvent(TitleScreen titleScreen) {
-        this.titleScreen = titleScreen;
-    }
+   public TitleScreenInitEvent(TitleScreen titleScreen) {
+      this.titleScreen = titleScreen;
+   }
 
-    public TitleScreen getTitleScreen() {
-        return titleScreen;
-    }
+   public TitleScreen getTitleScreen() {
+      return titleScreen;
+   }
 }

@@ -15,21 +15,21 @@ import dev.candycup.lifestealutils.event.events.PlayerNameRenderEvent;
  */
 public interface RenderEventListener extends LifestealEventListener {
 
-    /**
-     * called when an item entity is about to be rendered.
-     * features can modify the poseStack to apply transforms (e.g., scaling).
-     *
-     * @param event the item render event
-     */
-    default void onItemRender(ItemRenderEvent event) {
-    }
+   /**
+    * called when an item entity is about to be rendered.
+    * features can modify the poseStack to apply transforms (e.g., scaling).
+    *
+    * @param event the item render event
+    */
+   default void onItemRender(ItemRenderEvent event) {
+   }
 
-    /**
-     * called when a player name tag is rendered.
-     * features can modify the display name for alliance colors, etc.
-     *
-     * @param event the player name render event
-     */
-    default void onPlayerNameRender(PlayerNameRenderEvent event) {
-    }
+   /**
+    * called when a player name tag is rendered.
+    * features can modify the display name for alliance colors, etc.
+    *
+    * @param event the player name render event
+    */
+   default void onPlayerNameRender(PlayerNameRenderEvent event) {
+   }
 }

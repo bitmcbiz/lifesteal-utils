@@ -34,7 +34,7 @@ public class ItemClusterMixin implements ItemClusterRenderStateDuck {
    private void lifestealutils$captureRare(Entity entity, ItemStack stack, ItemModelResolver resolver, CallbackInfo ci) {
       lifestealutils$setRare(false);
       lifestealutils$setItemStack(stack.copy());
-      
+
       if (stack.isEmpty()) return;
 
       Item item = stack.getItem();

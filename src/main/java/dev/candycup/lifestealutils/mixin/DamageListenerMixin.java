@@ -24,7 +24,6 @@ public abstract class DamageListenerMixin {
 
       int entityId = packet.entityId();
 
-      // check if the local player was damaged - post player damaged event
       if (entityId == Minecraft.getInstance().player.getId()) {
          EventBus.getInstance().post(new PlayerDamagedEvent(entityId, packet));
          return;
@@ -37,7 +36,6 @@ public abstract class DamageListenerMixin {
          return;
       }
 
-      // otherwise, this is damage to another player - post damage confirmed event
       EventBus.getInstance().post(new DamageConfirmedEvent(entityId, packet));
    }
 }

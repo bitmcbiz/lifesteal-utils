@@ -7,25 +7,25 @@ import dev.candycup.lifestealutils.event.LSUEvent;
  * features can provide a custom splash text by setting the value.
  */
 public class SplashTextRequestEvent extends LSUEvent {
-    private String splashText;
+   private String splashText;
 
-    public SplashTextRequestEvent() {
-        this.splashText = null;
-    }
+   public SplashTextRequestEvent() {
+      this.splashText = null;
+   }
 
-    /**
-     * @return the custom splash text, or null if no feature provided one
-     */
-    public String getSplashText() {
-        return splashText;
-    }
+   /**
+    * @return the custom splash text, or null if no feature provided one
+    */
+   public String getSplashText() {
+      return splashText;
+   }
 
-    /**
-     * set a custom splash text. if multiple features set this, the last one wins.
-     *
-     * @param splashText the splash text to display
-     */
-    public void setSplashText(String splashText) {
-        this.splashText = splashText;
-    }
+   /**
+    * set a custom splash text. if multiple features set this, the last one wins.
+    *
+    * @param splashText the splash text to display
+    */
+   public void setSplashText(String splashText) {
+      this.splashText = splashText;
+   }
 }
