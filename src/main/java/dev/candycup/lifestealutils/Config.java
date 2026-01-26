@@ -160,6 +160,7 @@ public class Config {
                               .build())
                       .binding(false, Config::isChainCounterEnabled, Config::setChainCounterEnabled)
                       .controller(TickBoxControllerBuilder::create)
+                      .available(FeatureFlagController.isFeatureAvailable("chainCounterEnabled"))
                       .build())
               .option(Option.<String>createBuilder()
                       .name(Component.translatable("lsu.option.chainCounterFormat.name"))
@@ -202,6 +203,10 @@ public class Config {
    */
 
    public static boolean getEnablePmFormat() {
+      Boolean forcedState = FeatureFlagController.getForcedState("enablePmFormat");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.enablePmFormat;
    }
 
@@ -211,6 +216,10 @@ public class Config {
    }
 
    public static boolean getQuickJoinButtonEnabled() {
+      Boolean forcedState = FeatureFlagController.getForcedState("quickJoinButtonEnabled");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.quickJoinButtonEnabled;
    }
 
@@ -220,6 +229,10 @@ public class Config {
    }
 
    public static boolean getCustomPanoramaEnabled() {
+      Boolean forcedState = FeatureFlagController.getForcedState("customPanoramaEnabled");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.customPanoramaEnabled;
    }
 
@@ -229,6 +242,10 @@ public class Config {
    }
 
    public static boolean getDisableChatTags() {
+      Boolean forcedState = FeatureFlagController.getForcedState("disableChatTags");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.disableChatTags;
    }
 
@@ -238,6 +255,10 @@ public class Config {
    }
 
    public static boolean getRemoveUniquePlusColor() {
+      Boolean forcedState = FeatureFlagController.getForcedState("removeUniquePlusColor");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.removeUniquePlusColor;
    }
 
@@ -301,6 +322,10 @@ public class Config {
    }
 
    public static boolean getCustomSplashes() {
+      Boolean forcedState = FeatureFlagController.getForcedState("customSplashes");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.customSplashes;
    }
 
@@ -310,6 +335,10 @@ public class Config {
    }
 
    public static boolean isRareItemScaling() {
+      Boolean forcedState = FeatureFlagController.getForcedState("rareItemScaleEnabled");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return Config.rareItemScaleEnabled;
    }
 
@@ -358,6 +387,10 @@ public class Config {
    }
 
    public static boolean isChainCounterEnabled() {
+      Boolean forcedState = FeatureFlagController.getForcedState("chainCounterEnabled");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return chainCounterEnabled;
    }
 
@@ -385,6 +418,10 @@ public class Config {
    }
 
    public static boolean isAutoJoinLifestealOnHub() {
+      Boolean forcedState = FeatureFlagController.getForcedState("autoJoinLifestealOnHub");
+      if (forcedState != null) {
+         return forcedState;
+      }
       return autoJoinLifestealOnHub;
    }
 
@@ -451,6 +488,7 @@ public class Config {
                                               .build())
                                       .binding(false, Config::isAutoJoinLifestealOnHub, Config::setAutoJoinLifestealOnHub)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("autoJoinLifestealOnHub"))
                                       .build()
                               )
                               .build()
@@ -466,6 +504,7 @@ public class Config {
                                               .build())
                                       .binding(false, Config::isRareItemScaling, Config::toggleRareItemScaling)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("rareItemScaleEnabled"))
                                       .build()
                               )
                               .option(Option.<Float>createBuilder()
@@ -499,6 +538,7 @@ public class Config {
                                               .build())
                                       .binding(true, Config::getQuickJoinButtonEnabled, Config::setQuickJoinButtonEnabled)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("quickJoinButtonEnabled"))
                                       .build()
                               )
                               .option(Option.<Boolean>createBuilder()
@@ -510,6 +550,7 @@ public class Config {
                                               .build())
                                       .binding(true, Config::getCustomSplashes, Config::setCustomSplashes)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("customSplashes"))
                                       .build()
                               )
                               .option(Option.<Boolean>createBuilder()
@@ -521,6 +562,7 @@ public class Config {
                                               .build())
                                       .binding(true, Config::getCustomPanoramaEnabled, Config::setCustomPanoramaEnabled)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("customPanoramaEnabled"))
                                       .build()
                               )
                               .build()
@@ -536,6 +578,7 @@ public class Config {
                                               .build())
                                       .binding(false, Config::getDisableChatTags, Config::setDisableChatTags)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("disableChatTags"))
                                       .build()
                               )
                               .option(Option.<Boolean>createBuilder()
@@ -547,6 +590,7 @@ public class Config {
                                               .build())
                                       .binding(false, Config::getRemoveUniquePlusColor, Config::setRemoveUniquePlusColor)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("removeUniquePlusColor"))
                                       .build()
                               )
                               .build()
@@ -557,6 +601,7 @@ public class Config {
                                       .name(Component.translatable("lsu.option.pmFormatEnabled.name"))
                                       .binding(false, Config::getEnablePmFormat, Config::setEnablePmFormat)
                                       .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("enablePmFormat"))
                                       .build()
                               )
                               .option(Option.<String>createBuilder()
