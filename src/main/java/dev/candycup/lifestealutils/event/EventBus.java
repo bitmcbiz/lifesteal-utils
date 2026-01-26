@@ -133,6 +133,7 @@ public class EventBus {
          eventTypes.add(ClientTickEvent.class);
       } else if (interfaceName.equals("ServerEventListener")) {
          eventTypes.add(ServerChangeEvent.class);
+         eventTypes.add(LifestealShardSwapEvent.class);
       } else if (interfaceName.equals("RenderEventListener")) {
          eventTypes.add(ItemRenderEvent.class);
          eventTypes.add(PlayerNameRenderEvent.class);

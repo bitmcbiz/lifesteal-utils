@@ -1,6 +1,6 @@
 package dev.candycup.lifestealutils.mixin;
 
-import dev.candycup.lifestealutils.LifestealServerDetector;
+import dev.candycup.lifestealutils.api.LifestealServerDetector;
 import dev.candycup.lifestealutils.event.EventBus;
 import dev.candycup.lifestealutils.event.events.DamageConfirmedEvent;
 import dev.candycup.lifestealutils.event.events.PlayerDamagedEvent;

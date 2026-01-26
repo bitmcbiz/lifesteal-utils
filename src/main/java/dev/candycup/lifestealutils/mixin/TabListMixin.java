@@ -1,14 +1,12 @@
 package dev.candycup.lifestealutils.mixin;
 
 import dev.candycup.lifestealutils.Config;
-import dev.candycup.lifestealutils.LifestealServerDetector;
+import dev.candycup.lifestealutils.api.LifestealServerDetector;
 import dev.candycup.lifestealutils.event.EventBus;
 import dev.candycup.lifestealutils.event.events.PlayerNameRenderEvent;
 import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import net.kyori.adventure.platform.modcommon.MinecraftClientAudiences;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-
-import java.util.regex.Pattern;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerTabOverlay;

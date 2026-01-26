@@ -1,6 +1,6 @@
 package dev.candycup.lifestealutils.mixin;
 
-import dev.candycup.lifestealutils.LifestealServerDetector;
+import dev.candycup.lifestealutils.api.LifestealServerDetector;
 import dev.candycup.lifestealutils.event.EventBus;
 import dev.candycup.lifestealutils.event.events.ChatMessageReceivedEvent;
 import net.minecraft.client.gui.components.ChatComponent;

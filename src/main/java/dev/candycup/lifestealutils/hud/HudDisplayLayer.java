@@ -1,6 +1,6 @@
 package dev.candycup.lifestealutils.hud;
 
-import dev.candycup.lifestealutils.LifestealServerDetector;
+import dev.candycup.lifestealutils.api.LifestealServerDetector;
 import dev.candycup.lifestealutils.ui.HudElementEditor;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.Minecraft;

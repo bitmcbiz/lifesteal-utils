@@ -1,5 +1,6 @@
 package dev.candycup.lifestealutils.event.listener;
 
+import dev.candycup.lifestealutils.event.events.LifestealShardSwapEvent;
 import dev.candycup.lifestealutils.event.events.ServerChangeEvent;
 
 /**
@@ -15,5 +16,13 @@ public interface ServerEventListener extends LifestealEventListener {
     * @param event the server change event
     */
    default void onServerChange(ServerChangeEvent event) {
+   }
+
+   /**
+    * called when the player swaps to a different shard/lobby on lifesteal.net.
+    *
+    * @param event the shard swap event
+    */
+   default void onShardSwap(LifestealShardSwapEvent event) {
    }
 }

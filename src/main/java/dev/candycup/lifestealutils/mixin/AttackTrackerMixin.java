@@ -1,7 +1,6 @@
 package dev.candycup.lifestealutils.mixin;
 
-import dev.candycup.lifestealutils.CustomEnchantUtilities;
-import dev.candycup.lifestealutils.LifestealServerDetector;
+import dev.candycup.lifestealutils.api.LifestealServerDetector;
 import dev.candycup.lifestealutils.event.EventBus;
 import dev.candycup.lifestealutils.event.events.ClientAttackEvent;
 import net.minecraft.client.Minecraft;

@@ -58,6 +58,8 @@ public interface LifestealEventListener {
       if (this instanceof ServerEventListener serverListener) {
          if (event instanceof ServerChangeEvent e) {
             serverListener.onServerChange(e);
+         } else if (event instanceof LifestealShardSwapEvent e) {
+            serverListener.onShardSwap(e);
          }
       }
 

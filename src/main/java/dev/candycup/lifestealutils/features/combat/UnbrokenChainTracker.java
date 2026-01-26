@@ -1,7 +1,7 @@
 package dev.candycup.lifestealutils.features.combat;
 
 import dev.candycup.lifestealutils.Config;
-import dev.candycup.lifestealutils.CustomEnchantUtilities;
+import dev.candycup.lifestealutils.api.CustomEnchantUtilities;
 import dev.candycup.lifestealutils.event.events.ClientAttackEvent;
 import dev.candycup.lifestealutils.event.events.ClientTickEvent;
 import dev.candycup.lifestealutils.event.events.DamageConfirmedEvent;
