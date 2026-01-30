@@ -17,7 +17,9 @@
     "ScreenAccessor",
     "SplashManagerMixin",
     "TabListMixin",
-    "TitleScreenMixin"
+    "TitleScreenMixin",
+    "afk.GameRendererMixin",
+    "afk.GuiMixin"
   ],
   "injectors": {
     "defaultRequire": 1

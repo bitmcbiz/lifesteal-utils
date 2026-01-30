@@ -19,7 +19,7 @@ public final class PoiRepository {
       try {
          List<FeatureFlagController.PoiDefinition> defs = FeatureFlagController.getPois();
          for (FeatureFlagController.PoiDefinition d : defs) {
-            list.add(new Poi(d.id, d.name, d.x, d.y, d.z, d.dimension));
+            list.add(new Poi(d.id(), d.name(), d.x(), d.y(), d.z(), d.dimension(), d.disabled()));
          }
          LOGGER.info("[lsu-poi] loaded {} POIs from feature flags", list.size());
       } catch (Exception e) {
@@ -28,26 +28,28 @@ public final class PoiRepository {
       return list;
    }
 
-   public static final class Poi {
-      public final String id;
-      public final String name;
-      public final double x;
-      public final double y;
-      public final double z;
-      public final String dimension; // may be null
-
-      public Poi(String id, String name, double x, double y, double z, String dimension) {
-         this.id = id;
-         this.name = name;
-         this.x = x;
-         this.y = y;
-         this.z = z;
-         this.dimension = dimension;
+   public static List<Poi> loadPoisIncludingDisabled() {
+      List<Poi> list = new ArrayList<>();
+      try {
+         List<FeatureFlagController.PoiDefinition> defs = FeatureFlagController.getPoisIncludingDisabled();
+         for (FeatureFlagController.PoiDefinition d : defs) {
+            list.add(new Poi(d.id(), d.name(), d.x(), d.y(), d.z(), d.dimension(), d.disabled()));
+         }
+         LOGGER.info("[lsu-poi] loaded {} POIs (including disabled) from feature flags", list.size());
+      } catch (Exception e) {
+         LOGGER.warn("[lsu-poi] failed to load POIs from feature flags; returning empty list", e);
       }
+      return list;
+   }
+
+   /**
+    * @param dimension may be null
+    */
+   public record Poi(String id, String name, double x, double y, double z, String dimension, boolean disabled) {
 
       @Override
       public String toString() {
-         return "Poi{" + id + "," + name + " (" + x + "," + y + "," + z + ")" + (dimension != null ? "@" + dimension : "") + "}";
+         return "Poi{" + id + "," + name + " (" + x + "," + y + "," + z + ")" + (dimension != null ? "@" + dimension : "") + (disabled ? ":disabled" : "") + "}";
       }
    }
 }

@@ -112,8 +112,8 @@ public final class PoiDirectionalIndicator {
       ensurePositionRegistered(guiWidth, guiHeight);
 
       // calculate angle from player to POI
-      double dx = target.x - client.player.getX();
-      double dz = target.z - client.player.getZ();
+      double dx = target.x() - client.player.getX();
+      double dz = target.z() - client.player.getZ();
       double angleToTarget = Math.atan2(-dx, dz); // angle in radians, 0 = north (+Z)
 
       // get player's yaw and convert to radians

@@ -89,6 +89,12 @@ public class Config {
    @SerialEntry(comment = "Custom format for the unbroken chain counter display")
    public static String chainCounterFormat = "";
 
+   @SerialEntry(comment = "Whether to enable the heavenly durability calculator HUD element")
+   public static boolean heavenlyDurabilityCalculatorEnabled = false;
+
+   @SerialEntry(comment = "Custom format for the heavenly durability calculator display")
+   public static String heavenlyDurabilityCalculatorFormat = "";
+
    @SerialEntry(comment = "Enable POI waypoints (directional HUD indicator)")
    public static boolean poiWaypointsEnabled = true;
 
@@ -107,8 +113,14 @@ public class Config {
    @SerialEntry(comment = "Configured POI id to track (empty = none)")
    public static String poiTrackedId = "";
 
+   @SerialEntry(comment = "Show Lifesteal Utils POIs as Xaero's Minimap waypoints")
+   public static boolean xaeroPoiWaypointsEnabled = true;
+
    @SerialEntry(comment = "Automatically join the Lifesteal gamemode when connecting to the lifesteal.net hub")
    public static boolean autoJoinLifestealOnHub = false;
+
+   @SerialEntry(comment = "Enable the custom baltop interface that replaces the server's /baltop GUI")
+   public static boolean customBaltopInterfaceEnabled = true;
 
    /**
     * Describes how the POI HUD indicator should be displayed.
@@ -161,6 +173,19 @@ public class Config {
       OptionDescription.Builder builder = OptionDescription.createBuilder()
               .text(MessagingUtils.miniMessage(baseMiniMessage));
       String reasoning = FeatureFlagController.getReasoning(featureKey);
+      if (reasoning != null && !reasoning.isBlank()) {
+         builder.text(MessagingUtils.miniMessage(reasoning));
+      }
+      return builder.build();
+   }
+
+   private static OptionDescription xaeroPoiWaypointDescription() {
+      OptionDescription.Builder builder = OptionDescription.createBuilder()
+              .text(Component.translatable("lsu.option.xaeroPoiWaypointsEnabled.description"));
+      if (!isXaeroMinimapInstalled()) {
+         builder.text(Component.translatable("lsu.option.xaeroPoiWaypointsEnabled.missingMod"));
+      }
+      String reasoning = FeatureFlagController.getReasoning("xaeroPoiWaypointsEnabled");
       if (reasoning != null && !reasoning.isBlank()) {
          builder.text(MessagingUtils.miniMessage(reasoning));
       }
@@ -239,6 +264,38 @@ public class Config {
                               ))
                               .build())
                       .binding(defaultFormat, () -> getChainCounterFormat(defaultFormat), Config::setChainCounterFormat)
+                      .controller(StringControllerBuilder::create)
+                      .build())
+              .build();
+   }
+
+   private static OptionGroup buildHeavenlyDurabilityCalculatorOptions() {
+      String defaultFormat = "<gold><bold>Dura after heavenly:</bold></gold><white> {{durability}}</white>";
+      ensureHeavenlyDurabilityFormat(defaultFormat);
+
+      return OptionGroup.createBuilder()
+              .name(Component.translatable("lsu.group.heavenlyDurabilityCalculator"))
+              .option(Option.<Boolean>createBuilder()
+                      .name(Component.translatable("lsu.option.heavenlyDurabilityEnabled.name"))
+                      .description(OptionDescription.createBuilder()
+                              .text(MessagingUtils.miniMessage(
+                                      "Calculates how much durability your helmet would have after triggering Heavenly."
+                              ))
+                              .build())
+                      .binding(false, Config::isHeavenlyDurabilityCalculatorEnabled, Config::setHeavenlyDurabilityCalculatorEnabled)
+                      .controller(TickBoxControllerBuilder::create)
+                      .build())
+              .option(Option.<String>createBuilder()
+                      .name(Component.translatable("lsu.option.heavenlyDurabilityFormat.name"))
+                      .description(OptionDescription.createBuilder()
+                              .text(MessagingUtils.miniMessage(
+                                      "Customize the heavenly durability calculator display format.\n\n" +
+                                              "Placeholders:\n" +
+                                              "- <gray>{{durability}}</gray> - calculated durability after heavenly\n\n" +
+                                              "Default: " + defaultFormat
+                              ))
+                              .build())
+                      .binding(defaultFormat, () -> getHeavenlyDurabilityFormat(defaultFormat), Config::setHeavenlyDurabilityFormat)
                       .controller(StringControllerBuilder::create)
                       .build())
               .build();
@@ -482,6 +539,33 @@ public class Config {
       }
    }
 
+   public static boolean isHeavenlyDurabilityCalculatorEnabled() {
+      return heavenlyDurabilityCalculatorEnabled;
+   }
+
+   public static void setHeavenlyDurabilityCalculatorEnabled(boolean enabled) {
+      heavenlyDurabilityCalculatorEnabled = enabled;
+      HANDLER.save();
+   }
+
+   public static String getHeavenlyDurabilityFormat(String fallback) {
+      if (heavenlyDurabilityCalculatorFormat == null || heavenlyDurabilityCalculatorFormat.isBlank()) {
+         return fallback;
+      }
+      return heavenlyDurabilityCalculatorFormat;
+   }
+
+   public static void setHeavenlyDurabilityFormat(String format) {
+      heavenlyDurabilityCalculatorFormat = format;
+      HANDLER.save();
+   }
+
+   public static void ensureHeavenlyDurabilityFormat(String fallback) {
+      if (heavenlyDurabilityCalculatorFormat == null || heavenlyDurabilityCalculatorFormat.isBlank()) {
+         heavenlyDurabilityCalculatorFormat = fallback;
+      }
+   }
+
    public static boolean getPoiWaypointsEnabled() {
       Boolean forced = FeatureFlagController.getForcedState("poiWaypointsEnabled");
       if (forced != null) return forced;
@@ -579,6 +663,39 @@ public class Config {
    }
 
    /**
+    * Checks if Xaero POI waypoints should be displayed.
+    *
+    * @return true if xaero waypoints should be active
+    */
+   public static boolean isXaeroPoiWaypointsEnabled() {
+      if (!isXaeroMinimapInstalled()) {
+         return false;
+      }
+      Boolean forced = FeatureFlagController.getForcedState("xaeroPoiWaypointsEnabled");
+      if (forced != null) return forced;
+      return xaeroPoiWaypointsEnabled;
+   }
+
+   /**
+    * Updates Xaero POI waypoint integration state.
+    *
+    * @param enabled whether xaero poi waypoints should be active
+    */
+   public static void setXaeroPoiWaypointsEnabled(boolean enabled) {
+      xaeroPoiWaypointsEnabled = enabled;
+      HANDLER.save();
+   }
+
+   /**
+    * Checks if Xaero's Minimap is installed.
+    *
+    * @return true when xaero minimap is present
+    */
+   public static boolean isXaeroMinimapInstalled() {
+      return FabricLoader.getInstance().isModLoaded("xaerominimap");
+   }
+
+   /**
     * Ensures the POI HUD indicator mode is set, using legacy values if needed.
     */
    public static void ensurePoiHudIndicatorMode() {
@@ -613,6 +730,15 @@ public class Config {
       HANDLER.save();
    }
 
+   public static boolean isCustomBaltopInterfaceEnabled() {
+      return customBaltopInterfaceEnabled;
+   }
+
+   public static void setCustomBaltopInterfaceEnabled(boolean enabled) {
+      customBaltopInterfaceEnabled = enabled;
+      HANDLER.save();
+   }
+
    public static void load() {
       FeatureFlagController.ensureLoaded();
       HANDLER.load();
@@ -627,6 +753,7 @@ public class Config {
                       .name(Component.translatable("lsu.category.timersCounters"))
                       .group(buildTimerOptions())
                       .group(buildChainCounterOptions())
+                      .group(buildHeavenlyDurabilityCalculatorOptions())
                       .build()
               )
               .category(ConfigCategory.createBuilder()
@@ -661,6 +788,19 @@ public class Config {
               )
               .category(ConfigCategory.createBuilder()
                       .name(Component.translatable("lsu.category.qol"))
+                      .group(OptionGroup.createBuilder()
+                              .name(Component.translatable("lsu.group.customUis"))
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.customBaltopInterface.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(Component.translatable("lsu.option.customBaltopInterface.description"))
+                                              .build())
+                                      .binding(true, Config::isCustomBaltopInterfaceEnabled, Config::setCustomBaltopInterfaceEnabled)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .build()
+                              )
+                              .build()
+                      )
                       .group(OptionGroup.createBuilder()
                               .name(Component.translatable("lsu.group.autoJoin"))
                               .option(Option.<Boolean>createBuilder()
@@ -722,18 +862,18 @@ public class Config {
                                       .build()
                               )
                               .option(Option.<PoiHudIndicatorMode>createBuilder()
-                                 .name(Component.translatable("lsu.option.poiHudIndicatorMode.name"))
-                                 .description(OptionDescription.createBuilder()
-                                    .text(MessagingUtils.miniMessage(
-                                       "Controls how the POI tracker is shown in your HUD.\n\n" +
-                                          "This setting is ignored when POI waypoints are disabled."
-                                    ))
-                                    .build())
-                                 .binding(PoiHudIndicatorMode.TEXT_AND_COMPASS, Config::getPoiHudIndicatorMode, Config::setPoiHudIndicatorMode)
-                                 .controller(opt -> EnumControllerBuilder.create(opt)
-                                    .enumClass(PoiHudIndicatorMode.class)
-                                    .formatValue(mode -> Component.translatable(mode.getTranslationKey())))
-                                 .build()
+                                      .name(Component.translatable("lsu.option.poiHudIndicatorMode.name"))
+                                      .description(OptionDescription.createBuilder()
+                                              .text(MessagingUtils.miniMessage(
+                                                      "Controls how the POI tracker is shown in your HUD.\n\n" +
+                                                              "This setting is ignored when POI waypoints are disabled."
+                                              ))
+                                              .build())
+                                      .binding(PoiHudIndicatorMode.TEXT_AND_COMPASS, Config::getPoiHudIndicatorMode, Config::setPoiHudIndicatorMode)
+                                      .controller(opt -> EnumControllerBuilder.create(opt)
+                                              .enumClass(PoiHudIndicatorMode.class)
+                                              .formatValue(mode -> Component.translatable(mode.getTranslationKey())))
+                                      .build()
                               )
                               .option(Option.<Boolean>createBuilder()
                                       .name(Component.translatable("lsu.option.poiAlwaysShowClosest.name"))
@@ -756,6 +896,18 @@ public class Config {
                                               .build())
                                       .binding(Config.poiWaypointFormat, () -> Config.getPoiWaypointFormat("<gray><bold>{{poi}}</bold>: {{distance}} blocks away"), Config::setPoiWaypointFormat)
                                       .controller(StringControllerBuilder::create)
+                                      .build()
+                              )
+                              .build()
+                      )
+                      .group(OptionGroup.createBuilder()
+                              .name(Component.translatable("lsu.group.xaeroWaypointsIntegration"))
+                              .option(Option.<Boolean>createBuilder()
+                                      .name(Component.translatable("lsu.option.xaeroPoiWaypointsEnabled.name"))
+                                      .description(xaeroPoiWaypointDescription())
+                                      .binding(Config.xaeroPoiWaypointsEnabled, Config::isXaeroPoiWaypointsEnabled, Config::setXaeroPoiWaypointsEnabled)
+                                      .controller(TickBoxControllerBuilder::create)
+                                      .available(FeatureFlagController.isFeatureAvailable("xaeroPoiWaypointsEnabled") && isXaeroMinimapInstalled())
                                       .build()
                               )
                               .build()

@@ -11,12 +11,10 @@ import dev.candycup.lifestealutils.hud.HudElementDefinition;
 import dev.candycup.lifestealutils.hud.HudPosition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public final class PoiWaypointTracker implements TickEventListener, ServerEventListener {
@@ -46,7 +44,7 @@ public final class PoiWaypointTracker implements TickEventListener, ServerEventL
               Identifier.fromNamespaceAndPath("lifestealutils", CONFIG_ID + "_text"),
               "POI Waypoint",
               this::getDisplayText,
-               HudPosition.clamp(DEFAULT_TEXT_X, DEFAULT_TEXT_Y)
+              HudPosition.clamp(DEFAULT_TEXT_X, DEFAULT_TEXT_Y)
       );
 
       LOGGER.info("[lsu-poi] initialized with {} POIs", pois.size());
@@ -80,7 +78,7 @@ public final class PoiWaypointTracker implements TickEventListener, ServerEventL
       String configuredId = Config.getPoiTrackedId();
       if (configuredId != null && !configuredId.isBlank()) {
          Optional<PoiRepository.Poi> match = pois.stream()
-                 .filter(p -> p.id.equals(configuredId))
+                 .filter(p -> p.id().equals(configuredId))
                  .findFirst();
          currentTarget = match.orElse(null);
          return;
@@ -109,15 +107,15 @@ public final class PoiWaypointTracker implements TickEventListener, ServerEventL
       PoiRepository.Poi best = null;
       double bestDist = Double.MAX_VALUE;
       for (PoiRepository.Poi poi : pois) {
-         if (poi.dimension != null && currentDimension != null) {
+         if (poi.dimension() != null && currentDimension != null) {
             // compare heuristically: either exact match or contained in registry key string
-            if (!poi.dimension.equals(currentDimension) && !currentDimension.contains(poi.dimension)) {
+            if (!poi.dimension().equals(currentDimension) && !currentDimension.contains(poi.dimension())) {
                continue;
             }
          }
 
-         double dx = poi.x - px;
-         double dz = poi.z - pz;
+         double dx = poi.x() - px;
+         double dz = poi.z() - pz;
          double dist = Math.sqrt(dx * dx + dz * dz);
          if (dist < bestDist) {
             bestDist = dist;
@@ -153,13 +151,13 @@ public final class PoiWaypointTracker implements TickEventListener, ServerEventL
       String format = Config.getPoiWaypointFormat(DEFAULT_FORMAT);
       if (format == null || format.isBlank()) format = DEFAULT_FORMAT;
 
-            String distanceText = distance == UNKNOWN_DISTANCE
-               ? INFINITY_SYMBOL
-               : String.valueOf(distance);
+      String distanceText = distance == UNKNOWN_DISTANCE
+              ? INFINITY_SYMBOL
+              : String.valueOf(distance);
 
-            return format
-               .replace("{{poi}}", t.name)
-               .replace("{{distance}}", distanceText);
+      return format
+              .replace("{{poi}}", t.name())
+              .replace("{{distance}}", distanceText);
    }
 
    /**
@@ -188,8 +186,8 @@ public final class PoiWaypointTracker implements TickEventListener, ServerEventL
          return UNKNOWN_DISTANCE;
       }
 
-      double dx = target.x - client.player.getX();
-      double dz = target.z - client.player.getZ();
+      double dx = target.x() - client.player.getX();
+      double dz = target.z() - client.player.getZ();
       return (int) Math.round(Math.sqrt(dx * dx + dz * dz));
    }
 
@@ -200,11 +198,11 @@ public final class PoiWaypointTracker implements TickEventListener, ServerEventL
     * @return true when dimensions match or no dimension is set
     */
    private boolean isSameDimension(PoiRepository.Poi target) {
-      if (target.dimension == null || target.dimension.isBlank()) {
+      if (target.dimension() == null || target.dimension().isBlank()) {
          return true;
       }
 
-      boolean poiNether = target.dimension.contains(POI_DIMENSION_NETHER);
+      boolean poiNether = target.dimension().contains(POI_DIMENSION_NETHER);
       boolean shardNether = isShardNether();
       return poiNether == shardNether;
    }

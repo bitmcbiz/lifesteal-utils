@@ -121,13 +121,37 @@ public final class FeatureFlagController {
       List<PoiDefinition> list = new ArrayList<>();
       for (FeatureFlagPoi p : payload.pois) {
          if (p == null || p.id == null || p.name == null) continue;
+         boolean disabled = p.disabled != null && p.disabled;
+         if (disabled) {
+            continue;
+         }
          double x = p.x != null ? p.x : 0.0;
          double y = p.y != null ? p.y : 0.0;
          double z = p.z != null ? p.z : 0.0;
-         list.add(new PoiDefinition(p.id, p.name, x, y, z, p.dimension));
+         list.add(new PoiDefinition(p.id, p.name, x, y, z, p.dimension, false));
       }
       return list;
    }
+
+   /**
+    * retrieves POI definitions from the remote payload, including disabled ones.
+    *
+    * @return list of poi definitions (may include disabled entries)
+    */
+   public static List<PoiDefinition> getPoisIncludingDisabled() {
+      ensureLoaded();
+      List<PoiDefinition> list = new ArrayList<>();
+      for (FeatureFlagPoi p : payload.pois) {
+         if (p == null || p.id == null || p.name == null) continue;
+         boolean disabled = p.disabled != null && p.disabled;
+         double x = p.x != null ? p.x : 0.0;
+         double y = p.y != null ? p.y : 0.0;
+         double z = p.z != null ? p.z : 0.0;
+         list.add(new PoiDefinition(p.id, p.name, x, y, z, p.dimension, disabled));
+      }
+      return list;
+   }
+
    /**
     * retrieves the list of splash texts from the remote payload.
     *
@@ -288,23 +312,10 @@ public final class FeatureFlagController {
       Double y;
       Double z;
       String dimension;
+      Boolean disabled;
    }
 
-   public static final class PoiDefinition {
-      public final String id;
-      public final String name;
-      public final double x;
-      public final double y;
-      public final double z;
-      public final String dimension;
-
-      public PoiDefinition(String id, String name, double x, double y, double z, String dimension) {
-         this.id = id;
-         this.name = name;
-         this.x = x;
-         this.y = y;
-         this.z = z;
-         this.dimension = dimension;
-      }
+   public record PoiDefinition(String id, String name, double x, double y, double z, String dimension,
+                               boolean disabled) {
    }
 }

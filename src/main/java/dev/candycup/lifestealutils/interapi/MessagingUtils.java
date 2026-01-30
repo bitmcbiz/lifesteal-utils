@@ -57,18 +57,18 @@ public class MessagingUtils {
    }
 
    /**
-    * as support for components in the splash screen was added in 1.21.9 or so,
-    * 1.21.8 and below need a safe string version of miniMessage (which just removes the formatting)
+    * as support for components in the splash screen was added in 1.21.11,
+    * older versions need a safe string version of minimessage (which removes formatting)
     *
-    * @param miniMessage the miniMessage formatted string
+    * @param miniMessage the minimessage formatted string
     * @return the safe string for the current version
     */
    public static String miniMessageToSplashSafe(String miniMessage) {
-      //?if 1.21.8 {
-      /*return miniMessage(miniMessage).getString();*/
-      //?} else {
+      //? if > 1.21.10 {
       return miniMessage;
-      //?}
+      //? } else {
+      /*return miniMessage(miniMessage).getString();
+       *///? }
    }
 }
 

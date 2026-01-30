@@ -5,6 +5,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.candycup.lifestealutils.event.EventBus;
 import dev.candycup.lifestealutils.event.events.ClientTickEvent;
 import dev.candycup.lifestealutils.features.alliances.Alliances;
+import dev.candycup.lifestealutils.features.afk.AfkMode;
+import dev.candycup.lifestealutils.features.baltop.BaltopScraper;
+import dev.candycup.lifestealutils.features.combat.HeavenlyDurabilityCalculator;
 import dev.candycup.lifestealutils.features.items.RareItemHighlight;
 import dev.candycup.lifestealutils.features.messages.ChatTagRemover;
 import dev.candycup.lifestealutils.features.messages.PrivateMessageFormatter;
@@ -17,6 +20,7 @@ import dev.candycup.lifestealutils.hud.HudElementDefinition;
 import dev.candycup.lifestealutils.hud.HudElementManager;
 import dev.candycup.lifestealutils.features.combat.UnbrokenChainTracker;
 import dev.candycup.lifestealutils.features.timers.BasicTimerManager;
+import dev.candycup.lifestealutils.integrations.xaero.XaeroPoiWaypointIntegration;
 import dev.candycup.lifestealutils.interapi.MessagingUtils;
 import dev.candycup.lifestealutils.ui.HudElementEditor;
 import dev.candycup.lifestealutils.ui.RadarScreen;
@@ -34,12 +38,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 import java.util.Objects;
+
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +52,9 @@ import java.io.File;
 
 public final class LifestealUtils implements ClientModInitializer {
    private static final Logger LOGGER = LoggerFactory.getLogger("lifestealutils");
+   private static final int DEFAULT_MESSAGE_COLOR = 0xFFFFFF;
+   private static final String TOGGLE_AFK_ENABLED_TRANSLATION_KEY = "lsu.command.toggle_afk.enabled";
+   private static final String TOGGLE_AFK_DISABLED_TRANSLATION_KEY = "lsu.command.toggle_afk.disabled";
    //? if >1.21.8
    private static KeyMapping.Category LIFESTEAL_UTIL_BINDS;
    private static KeyMapping openHudEditorKeyBinding;
@@ -55,8 +62,10 @@ public final class LifestealUtils implements ClientModInitializer {
    private static int pendingConfigOpenTicks = -1;
    private static int pendingHudEditorOpenTicks = -1;
    private static int pendingRadarOpenTicks = -1;
+   private static boolean pendingBaltopScrape = false;
 
    private static UnbrokenChainTracker unbrokenChainTracker;
+   private static HeavenlyDurabilityCalculator heavenlyDurabilityCalculator;
    private static BasicTimerManager basicTimerManager;
    private static PrivateMessageFormatter privateMessageFormatter;
    private static ChatTagRemover chatTagRemover;
@@ -83,6 +92,9 @@ public final class LifestealUtils implements ClientModInitializer {
       unbrokenChainTracker = new UnbrokenChainTracker();
       EventBus.getInstance().register(unbrokenChainTracker);
       HudElementManager.register(unbrokenChainTracker.getHudDefinition());
+
+      heavenlyDurabilityCalculator = new HeavenlyDurabilityCalculator();
+      HudElementManager.register(heavenlyDurabilityCalculator.getHudDefinition());
 
       privateMessageFormatter = new PrivateMessageFormatter();
       EventBus.getInstance().register(privateMessageFormatter);
@@ -112,6 +124,11 @@ public final class LifestealUtils implements ClientModInitializer {
       dev.candycup.lifestealutils.features.qol.PoiWaypointTracker poiWaypointTracker = new dev.candycup.lifestealutils.features.qol.PoiWaypointTracker();
       EventBus.getInstance().register(poiWaypointTracker);
       HudElementManager.register(poiWaypointTracker.getHudDefinition());
+
+      if (FabricLoader.getInstance().isModLoaded("xaerominimap")) {
+         XaeroPoiWaypointIntegration xaeroPoiWaypointIntegration = new XaeroPoiWaypointIntegration();
+         EventBus.getInstance().register(xaeroPoiWaypointIntegration);
+      }
 
       // poi directional indicator (renders with the waypoint tracker)
       dev.candycup.lifestealutils.features.qol.PoiDirectionalIndicator poiDirectionalIndicator =
@@ -195,6 +212,21 @@ public final class LifestealUtils implements ClientModInitializer {
                pendingRadarOpenTicks--;
             }
          }
+         if (pendingBaltopScrape) {
+            if (client.screen == null) {
+               pendingBaltopScrape = false;
+               BaltopScraper.getInstance().startScraping(
+                       null,
+                       error -> {
+                          LOGGER.warn("Baltop scraping failed: {}", error);
+                          MessagingUtils.showMiniMessage("<red>Failed to load baltop: " + error + "</red>");
+                       }
+               );
+            }
+         }
+         // tick the scraper (handles pending clicks and timeout)
+         BaltopScraper.getInstance().tick();
+
          if (openHudEditorKeyBinding.consumeClick()) {
             if (client.screen != null) return;
             pendingHudEditorOpenTicks = 1;
@@ -258,6 +290,28 @@ public final class LifestealUtils implements ClientModInitializer {
                                     client.execute(() -> pendingRadarOpenTicks = 1);
                                     return 1;
                                  }))
+                         .then(ClientCommandManager.literal("toggle-afk")
+                                 .executes(commandContext -> {
+                                    Minecraft client = Minecraft.getInstance();
+                                    client.execute(() -> {
+                                       boolean enabled = AfkMode.toggle();
+                                       String translationKey = enabled ? TOGGLE_AFK_ENABLED_TRANSLATION_KEY : TOGGLE_AFK_DISABLED_TRANSLATION_KEY;
+                                       MessagingUtils.showMessage(Component.translatable(translationKey), DEFAULT_MESSAGE_COLOR);
+                                    });
+                                    return 1;
+                                 }))
+                         .then(ClientCommandManager.literal("baltop")
+                                 .executes(commandContext -> {
+                                    Minecraft client = Minecraft.getInstance();
+                                    client.execute(() -> {
+                                       if (Config.isCustomBaltopInterfaceEnabled()) {
+                                          pendingBaltopScrape = true;
+                                       } else if (client.player != null) {
+                                          client.player.connection.sendCommand("baltop");
+                                       }
+                                    });
+                                    return 1;
+                                 }))
                          .then(ClientCommandManager.literal("alliances")
                                  .executes(commandContext -> {
                                     Alliances.showAllianceList();
@@ -306,24 +360,24 @@ public final class LifestealUtils implements ClientModInitializer {
                          .then(ClientCommandManager.literal("track-poi")
                                  .then(ClientCommandManager.argument("poi", StringArgumentType.greedyString())
                                          .suggests((context, builder) -> {
-                                             String remaining = builder.getRemainingLowerCase();
-                                             for (dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition p : dev.candycup.lifestealutils.FeatureFlagController.getPois()) {
-                                                if (p == null || p.name == null || p.name.isBlank()) continue;
-                                                String nameLower = p.name.toLowerCase();
-                                                if (remaining.isBlank() || nameLower.contains(remaining)) {
-                                                   builder.suggest(p.name);
-                                                }
-                                             }
-                                             return builder.buildFuture();
+                                            String remaining = builder.getRemainingLowerCase();
+                                            for (dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition p : dev.candycup.lifestealutils.FeatureFlagController.getPois()) {
+                                               if (p == null || p.name() == null || p.name().isBlank()) continue;
+                                               String nameLower = p.name().toLowerCase();
+                                               if (remaining.isBlank() || nameLower.contains(remaining)) {
+                                                  builder.suggest(p.name());
+                                               }
+                                            }
+                                            return builder.buildFuture();
                                          })
                                          .executes(commandContext -> {
                                             String poiArg = StringArgumentType.getString(commandContext, "poi").trim();
                                             if (poiArg.equalsIgnoreCase("none") || poiArg.equalsIgnoreCase("clear") || poiArg.equalsIgnoreCase("off")) {
-                                                return handleUntrackPoi();
+                                               return handleUntrackPoi();
                                             }
 
                                             dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition matched = dev.candycup.lifestealutils.FeatureFlagController.getPois().stream()
-                                                    .filter(p -> p.name != null && p.name.equalsIgnoreCase(poiArg))
+                                                    .filter(p -> p.name() != null && p.name().equalsIgnoreCase(poiArg))
                                                     .findFirst().orElse(null);
                                             if (matched == null) {
                                                MessagingUtils.showMiniMessage("<red>Unknown POI: <white>" + MiniMessage.miniMessage().escapeTags(poiArg) + "</white></red>");
@@ -331,16 +385,16 @@ public final class LifestealUtils implements ClientModInitializer {
                                             }
 
                                             dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition currentTracked = resolveCurrentTrackedPoi();
-                                            if (currentTracked != null && Objects.equals(currentTracked.id, matched.id)) {
+                                            if (currentTracked != null && Objects.equals(currentTracked.id(), matched.id())) {
                                                return handleUntrackPoi();
                                             }
 
-                                            Config.setPoiTrackedId(matched.id);
-                                            MessagingUtils.showMiniMessage("<green>Now tracking POI: <white>" + MiniMessage.miniMessage().escapeTags(matched.name) + "</white></green>");
+                                            Config.setPoiTrackedId(matched.id());
+                                            MessagingUtils.showMiniMessage("<green>Now tracking POI: <white>" + MiniMessage.miniMessage().escapeTags(matched.name()) + "</white></green>");
                                             return 1;
                                          })))
-                        .then(ClientCommandManager.literal("untrack-poi")
-                                .executes(commandContext -> handleUntrackPoi()))
+                         .then(ClientCommandManager.literal("untrack-poi")
+                                 .executes(commandContext -> handleUntrackPoi()))
                          .then(ClientCommandManager.literal("utilities")
                                  .then(ClientCommandManager.literal("copy-client-info-to-clipboard")
                                          .executes(commandContext -> {
@@ -377,6 +431,13 @@ public final class LifestealUtils implements ClientModInitializer {
       });
    }
 
+   /**
+    * Queues the custom baltop interface to open once no other screen is active.
+    */
+   public static void queueBaltopScrape() {
+      pendingBaltopScrape = true;
+   }
+
    public static BasicTimerManager getBasicTimerManager() {
       return basicTimerManager;
    }
@@ -388,8 +449,8 @@ public final class LifestealUtils implements ClientModInitializer {
     */
    private static int handleUntrackPoi() {
       dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition currentTracked = resolveCurrentTrackedPoi();
-      String trackedName = currentTracked != null && currentTracked.name != null && !currentTracked.name.isBlank()
-              ? currentTracked.name
+      String trackedName = currentTracked != null && currentTracked.name() != null && !currentTracked.name().isBlank()
+              ? currentTracked.name()
               : "POI";
       String escapedName = MiniMessage.miniMessage().escapeTags(trackedName);
 
@@ -427,8 +488,8 @@ public final class LifestealUtils implements ClientModInitializer {
     */
    private static dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition resolvePoiById(String id) {
       for (dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition p : dev.candycup.lifestealutils.FeatureFlagController.getPois()) {
-         if (p == null || p.id == null) continue;
-         if (p.id.equals(id)) {
+         if (p == null || p.id() == null) continue;
+         if (p.id().equals(id)) {
             return p;
          }
       }
@@ -461,14 +522,14 @@ public final class LifestealUtils implements ClientModInitializer {
       double bestDist = Double.MAX_VALUE;
       for (dev.candycup.lifestealutils.FeatureFlagController.PoiDefinition poi : dev.candycup.lifestealutils.FeatureFlagController.getPois()) {
          if (poi == null) continue;
-         if (poi.dimension != null && currentDimension != null) {
-            if (!poi.dimension.equals(currentDimension) && !currentDimension.contains(poi.dimension)) {
+         if (poi.dimension() != null && currentDimension != null) {
+            if (!poi.dimension().equals(currentDimension) && !currentDimension.contains(poi.dimension())) {
                continue;
             }
          }
 
-         double dx = poi.x - px;
-         double dz = poi.z - pz;
+         double dx = poi.x() - px;
+         double dz = poi.z() - pz;
          double dist = Math.sqrt(dx * dx + dz * dz);
          if (dist < bestDist) {
             bestDist = dist;
