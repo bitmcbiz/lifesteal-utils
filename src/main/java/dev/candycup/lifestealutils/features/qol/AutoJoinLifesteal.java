@@ -24,6 +24,8 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
    private int pendingJoinTicks = -1;
    private int hubCheckTicks = 0;
    private int joinCooldownTicks = 0;
+   private String previousShard = null;
+   private boolean manualHubJoin = false;
 
    @Override
    public boolean isEnabled() {
@@ -42,11 +44,25 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
          return;
       }
 
-      // check if we're in a hub shard (starts with 'hub-')
+      // check if we're in a hub shard (starts with 'hub-') / check if player came from a lifesteal shard (starts with 'lifesteal-')
       if (shardName.startsWith("hub-")) {
+         boolean cameFromLifesteal = previousShard != null 
+                                   && !previousShard.startsWith("hub-")
+                                   && previousShard.startsWith("lifesteal-");
+         
+         if (cameFromLifesteal) {
+            manualHubJoin = true;
+            previousShard = shardName;
+            return;
+         }
+
          pendingJoinTicks = 20;
-         LOGGER.debug("[lsu-autojoin] detected hub shard '{}', scheduling /joinlifesteal in 1 second", shardName);
+         if (manualHubJoin) {
+            manualHubJoin = false;
+         }
       }
+      
+      previousShard = shardName;
    }
 
    @Override
@@ -75,8 +91,8 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
    }
 
    private void performHubCheck() {
-      // skip if still on cooldown
-      if (joinCooldownTicks > 0) {
+      // skip if still on cooldown or if the player manually joined the hub
+      if (joinCooldownTicks > 0 || manualHubJoin) {
          return;
       }
 
