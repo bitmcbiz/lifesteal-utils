@@ -78,5 +78,11 @@ public interface LifestealEventListener {
             uiListener.onSplashTextRequest(e);
          }
       }
+
+      if (this instanceof CommandEventListener commandListener) {
+         if (event instanceof CommandSentEvent e) {
+            commandListener.onCommandSent(e);
+         }
+      }
    }
 }
