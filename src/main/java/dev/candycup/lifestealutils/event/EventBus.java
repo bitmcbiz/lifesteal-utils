@@ -140,6 +140,8 @@ public class EventBus {
       } else if (interfaceName.equals("UIEventListener")) {
          eventTypes.add(TitleScreenInitEvent.class);
          eventTypes.add(SplashTextRequestEvent.class);
+      } else if (interfaceName.equals("CommandEventListener")) {
+         eventTypes.add(CommandSentEvent.class);
       }
 
       return eventTypes;
