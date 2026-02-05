@@ -4,6 +4,8 @@ import dev.candycup.lifestealutils.Config;
 import dev.candycup.lifestealutils.LifestealUtils;
 import dev.candycup.lifestealutils.api.LifestealServerDetector;
 import dev.candycup.lifestealutils.api.LifestealTablistAPI;
+import dev.candycup.lifestealutils.event.EventBus;
+import dev.candycup.lifestealutils.event.events.CommandSentEvent;
 import dev.candycup.lifestealutils.features.baltop.BaltopScraper;
 import dev.candycup.lifestealutils.ui.BaltopScreen;
 import net.minecraft.client.Minecraft;
@@ -55,6 +57,8 @@ public class ClientPacketListenerMixin {
     */
    @Inject(method = "sendCommand", at = @At("HEAD"), cancellable = true)
    private void onSendCommand(String command, CallbackInfo ci) {
+      EventBus.getInstance().post(new CommandSentEvent(command));
+
       if (!Config.isCustomBaltopInterfaceEnabled()) {
          return;
       }
@@ -77,3 +81,4 @@ public class ClientPacketListenerMixin {
       ci.cancel();
    }
 }
+
