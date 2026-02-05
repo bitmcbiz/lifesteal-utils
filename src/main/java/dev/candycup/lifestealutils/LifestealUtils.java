@@ -13,6 +13,7 @@ import dev.candycup.lifestealutils.features.messages.ChatTagRemover;
 import dev.candycup.lifestealutils.features.messages.PrivateMessageFormatter;
 import dev.candycup.lifestealutils.features.messages.RankPlusColorNormalizer;
 import dev.candycup.lifestealutils.features.qol.AutoJoinLifesteal;
+import dev.candycup.lifestealutils.features.qol.ManualShardSwapTracker;
 import dev.candycup.lifestealutils.features.titlescreen.CustomSplashes;
 import dev.candycup.lifestealutils.features.titlescreen.QuickJoinButton;
 import dev.candycup.lifestealutils.hud.HudDisplayLayer;
@@ -117,7 +118,10 @@ public final class LifestealUtils implements ClientModInitializer {
       customSplashes = new CustomSplashes();
       EventBus.getInstance().register(customSplashes);
 
-      autoJoinLifesteal = new AutoJoinLifesteal();
+      ManualShardSwapTracker manualSwapTracker = new ManualShardSwapTracker();
+      EventBus.getInstance().register(manualSwapTracker);
+
+      autoJoinLifesteal = new AutoJoinLifesteal(manualSwapTracker);
       EventBus.getInstance().register(autoJoinLifesteal);
 
       // poi waypoint tracker
