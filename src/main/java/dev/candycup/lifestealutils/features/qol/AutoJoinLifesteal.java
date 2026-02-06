@@ -74,7 +74,7 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
          return;
       }
 
-      // checks if ypo joined the first time or if you were on a lifesteal- shard before
+      // checks if you joined the first time or if you were on a lifesteal- shard before
       if (shardName.startsWith("hub-")) {
          boolean wasOnLifesteal = previousShard != null && previousShard.startsWith("lifesteal-");
          boolean isFirstJoin = previousShard == null;
