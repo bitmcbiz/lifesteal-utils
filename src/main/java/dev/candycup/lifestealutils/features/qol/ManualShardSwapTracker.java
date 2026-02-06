@@ -7,7 +7,7 @@ import dev.candycup.lifestealutils.event.listener.CommandEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// It tracks shard swaps (hub- and  lifesteal-) when /hub or /safelogout is getting used
+// It tracks shard swaps (hub- and  lifesteal-) when /hub or /safelogout are getting used
  
 public class ManualShardSwapTracker implements CommandEventListener {
    private static final Logger LOGGER = LoggerFactory.getLogger("lifestealutils/manualswap");
@@ -52,5 +52,10 @@ public class ManualShardSwapTracker implements CommandEventListener {
    public void resetTracking() {
       lastManualSwapTime = 0;
       LOGGER.debug("[lsu-manualswap] reset tracking");
+   }
+
+   public void clearOnDisconnect() {
+      lastManualSwapTime = 0;
+      LOGGER.debug("[lsu-manualswap] cleared on disconnect");
    }
 }
