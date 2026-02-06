@@ -19,15 +19,20 @@ import org.slf4j.LoggerFactory;
  */
 public class AutoJoinLifesteal implements ServerEventListener, TickEventListener {
    private static final Logger LOGGER = LoggerFactory.getLogger("lifestealutils/autojoin");
-   private static final int HUB_CHECK_INTERVAL = 100;
-   private static final int JOIN_COOLDOWN = 100;
+   private static final int HUB_CHECK_INTERVAL = 100; // check every 5 seconds
+   private static final int JOIN_COOLDOWN = 100; // 5 second cooldown after executing command
 
    private final ManualShardSwapTracker manualSwapTracker;
    private int pendingJoinTicks = -1;
    private int hubCheckTicks = 0;
    private int joinCooldownTicks = 0;
    private String previousShard = null;
+   private boolean wasConnected = false;
+   private int disconnectTicks = 0;
+   private static final int DISCONNECT_THRESHOLD_TICKS = 100;
 
+
+   
    public AutoJoinLifesteal(ManualShardSwapTracker manualSwapTracker) {
       this.manualSwapTracker = manualSwapTracker;
    }
@@ -42,13 +47,17 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
       return EventPriority.NORMAL;
    }
 
+   // tracks server changes
    @Override
    public void onServerChange(ServerChangeEvent event) {
       previousShard = null;
       pendingJoinTicks = -1;
+      wasConnected = false;
+      disconnectTicks = 0;
       manualSwapTracker.resetTracking();
    }
 
+   // it tracks if the shard gets changed
    @Override
    public void onShardSwap(LifestealShardSwapEvent event) {
       String shardName = event.getShardName();
@@ -57,6 +66,7 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
          return;
       }
 
+      // if the player is in a lifesteal- shard  it resets the tracking 
       if (shardName.startsWith("lifesteal-")) {
          manualSwapTracker.resetTracking();
          LOGGER.debug("[lsu-autojoin] returned to lifesteal shard '{}', reset manual swap tracking", shardName);
@@ -64,6 +74,7 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
          return;
       }
 
+      // checks if ypo joined the first time or if you were on a lifesteal- shard before
       if (shardName.startsWith("hub-")) {
          boolean wasOnLifesteal = previousShard != null && previousShard.startsWith("lifesteal-");
          boolean isFirstJoin = previousShard == null;
@@ -90,6 +101,29 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
 
    @Override
    public void onClientTick(ClientTickEvent event) {
+      Minecraft client = Minecraft.getInstance();
+      
+      if (client.player == null) {
+         if (wasConnected) {
+            disconnectTicks++;
+            
+            if (disconnectTicks >= DISCONNECT_THRESHOLD_TICKS) {
+               previousShard = null;
+               pendingJoinTicks = -1;
+               manualSwapTracker.clearOnDisconnect();
+               wasConnected = false;
+               disconnectTicks = 0;
+            }
+         }
+         return;
+      }
+      
+      disconnectTicks = 0;
+      
+      if (!wasConnected) {
+         wasConnected = true;
+      }
+
       // decrement cooldown
       if (joinCooldownTicks > 0) {
          joinCooldownTicks--;
@@ -143,4 +177,3 @@ public class AutoJoinLifesteal implements ServerEventListener, TickEventListener
       }
    }
 }
-
